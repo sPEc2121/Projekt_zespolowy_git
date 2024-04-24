@@ -11,7 +11,7 @@ cursor = conn.cursor()
 create_table_user = '''
 CREATE TABLE IF NOT EXISTS USER (
   Id INTEGER PRIMARY KEY AUTOINCREMENT,
-  Mail VARCHAR(30) NOT NULL,
+  Mail VARCHAR(30) UNIQUE NOT NULL,
   Password VARCHAR(30) NOT NULL,
   Active BOOLEAN NOT NULL
 );  
