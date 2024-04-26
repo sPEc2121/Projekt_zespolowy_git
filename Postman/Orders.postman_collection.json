@@ -1,0 +1,77 @@
+{
+	"info": {
+		"_postman_id": "e4b21cec-d99b-4e53-b3d7-484121d88211",
+		"name": "Orders",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34483196"
+	},
+	"item": [
+		{
+			"name": "Get all orders",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6MSwiTWFpbCI6ImtyenlzenRvZi5kdWRhQGV4YW1wbGUuY29tIiwiUm9sZU5hbWUiOiJDbGllbnQiLCJleHAiOjE3MTQwOTA0NjF9.xZbYofotQ_AEnRNUPrvtdamjljQJlpywVQXBEDUrr40",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://127.0.0.1:8000/get-all-orders/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"get-all-orders",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Order",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6MSwiTWFpbCI6ImtyenlzenRvZi5kdWRhQGV4YW1wbGUuY29tIiwiUm9sZU5hbWUiOiJDbGllbnQiLCJleHAiOjE3MTQxNzgyMTB9.ZmLnx1lOBts6UAcxHX0LC06Ek8y5n2DBxIy7NBsXnl8",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"SenderId\": 1,\r\n    \"ReceiverId\": 2,\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 1,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/create-order/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"create-order",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

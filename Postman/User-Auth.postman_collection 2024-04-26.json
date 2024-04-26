@@ -1,0 +1,234 @@
+{
+	"info": {
+		"_postman_id": "dc390f10-d13b-4d0e-9306-2e26b1e774ff",
+		"name": "User/Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "34483196"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Mail\": \"krzysztof.duda@example.com\",\r\n\"Password\": \"Qwerty12#$\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/login/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"login",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all users",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYWlsIjoia3J6eXN6dG9mLmR1ZGFAZXhhbXBsZS5jb20iLCJSb2xlTmFtZSI6IkNsaWVudCIsImV4cCI6MTcxMzk5OTA1MX0.gmv7v4qnx4fO5Di6T89CxkbG9hJxVEoLsZbupipkuPc",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/get-all-users/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"get-all-users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Mail\": \"example@example.com\",\r\n    \"Password\": \"password123\",\r\n    \"FirstName\": \"Jan\",\r\n    \"LastName\": \"Kowalski\",\r\n    \"BirthDate\": \"1990-01-01\",\r\n    \"Sex\": 1,\r\n    \"DefaultAddress\": \"Korzenna 2\",\r\n    \"DefaultPostalcode\": \"02-137\",\r\n    \"DefaultLocation\": \"Warszawa\",\r\n    \"Phone\": \"123-456-789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/register/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"register",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Disable user",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYWlsIjoia3J6eXN6dG9mLmR1ZGFAZXhhbXBsZS5jb20iLCJSb2xlTmFtZSI6IkNsaWVudCIsImV4cCI6MTcxMzk5OTA1MX0.gmv7v4qnx4fO5Di6T89CxkbG9hJxVEoLsZbupipkuPc",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"Id\": 51}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/disable-user/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"disable-user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get user info",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6MSwiTWFpbCI6ImtyenlzenRvZi5kdWRhQGV4YW1wbGUuY29tIiwiUm9sZU5hbWUiOiJDbGllbnQiLCJleHAiOjE3MTQwOTA0NjF9.xZbYofotQ_AEnRNUPrvtdamjljQJlpywVQXBEDUrr40",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/get-user-by-id/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"get-user-by-id",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit user Data",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6MSwiTWFpbCI6ImtyenlzenRvZi5kdWRhQGV4YW1wbGUuY29tIiwiUm9sZU5hbWUiOiJDbGllbnQiLCJleHAiOjE3MTQwOTA0NjF9.xZbYofotQ_AEnRNUPrvtdamjljQJlpywVQXBEDUrr40",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"Id\": 1,\r\n    \"Mail\": \"krzysztof.duda@example.com\",\r\n    \"Password\": \"Qwerty12#$\",\r\n    \"Active\": true,\r\n    \"FirstName\": \"Krzysztof\",\r\n    \"LastName\": \"Dudek\",\r\n    \"BirthDate\": \"1985-03-12\",\r\n    \"Sex\": false,\r\n    \"DefaultAddress\": \"Kwiatowa 12\",\r\n    \"DefaultPostalcode\": \"01-234\",\r\n    \"DefaultLocation\": \"Warszawa\",\r\n    \"Phone\": \"48501234567\",\r\n    \"Country\": \"Poland\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/edit-user/1/",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"edit-user",
+						"1",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
