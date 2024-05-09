@@ -1,9 +1,9 @@
 {
 	"info": {
-		"_postman_id": "495218bf-5da2-4887-be79-d538f48f777d",
+		"_postman_id": "6dd7195e-911b-4116-84e2-337b2d639d60",
 		"name": "PythonAPI",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "17442759"
+		"_exporter_id": "34483196"
 	},
 	"item": [
 		{
@@ -12,6 +12,24 @@
 				{
 					"name": "Login",
 					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response JSON\r",
+									"var responseBody = pm.response.json();\r",
+									"\r",
+									"// Extract the JWT token\r",
+									"var jwtToken = responseBody.jwt_token;\r",
+									"\r",
+									"// Set the JWT token as an environment variable\r",
+									"pm.environment.set(\"jwt_token\", jwtToken);\r",
+									"pm.collectionVariables.set(\"token\", \"Bearer \"+jwtToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
 						{
 							"listen": "prerequest",
 							"script": {
@@ -102,7 +120,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"Mail\": \"example@example.com\",\r\n    \"Password\": \"password123\",\r\n    \"FirstName\": \"Jan\",\r\n    \"LastName\": \"Kowalski\",\r\n    \"BirthDate\": \"1990-01-01\",\r\n    \"Sex\": 1,\r\n    \"DefaultAddress\": \"Korzenna 2\",\r\n    \"DefaultPostalcode\": \"02-137\",\r\n    \"DefaultLocation\": \"Warszawa\",\r\n    \"Phone\": \"123-456-789\"\r\n}",
+							"raw": "{\r\n    \"Mail\": \"example@example.com\",\r\n    \"Password\": \"password123\",\r\n    \"FirstName\": \"Jan\",\r\n    \"LastName\": \"Kowalski\",\r\n    \"BirthDate\": \"1990-01-01\",\r\n    \"Sex\": 1,\r\n    \"DefaultAddress\": \"Sienkiewicza 20\",\r\n    \"DefaultPostalcode\": \"65-001\",\r\n    \"DefaultLocation\": \"Zielona Góra\",\r\n    \"Phone\": \"123-456-789\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -261,7 +279,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6MSwiTWFpbCI6ImtyenlzenRvZi5kdWRhQGV4YW1wbGUuY29tIiwiUm9sZU5hbWUiOiJDbGllbnQiLCJleHAiOjE3MTQwOTA0NjF9.xZbYofotQ_AEnRNUPrvtdamjljQJlpywVQXBEDUrr40",
+								"value": "{{token}}",
 								"type": "text",
 								"uuid": "5fa32c86-34f0-4bdb-8bf7-e16758fc41fa"
 							}
@@ -278,6 +296,37 @@
 							"port": "8000",
 							"path": [
 								"get-all-orders",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all orders for User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}",
+								"type": "text",
+								"uuid": "5fa32c86-34f0-4bdb-8bf7-e16758fc41fa"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/get-user-orders/1/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"get-user-orders",
+								"1",
 								""
 							]
 						}
@@ -418,7 +467,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/get-all-available-machines/",
+							"raw": "http://127.0.0.1:8000/get-available-machines-by-size/S/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -428,7 +477,8 @@
 							],
 							"port": "8000",
 							"path": [
-								"get-all-available-machines",
+								"get-available-machines-by-size",
+								"S",
 								""
 							]
 						}
