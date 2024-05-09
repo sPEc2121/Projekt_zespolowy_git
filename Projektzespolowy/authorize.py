@@ -3,6 +3,7 @@ import json
 import sqlite3
 import jwt
 from datetime import datetime, timedelta
+from .coordinates import get_coordinates
 
 def register(request):
     if request.method == 'POST':
@@ -18,7 +19,10 @@ def register(request):
         default_postalcode = data.get('DefaultPostalcode')
         default_location = data.get('DefaultLocation')
         phone = data.get('Phone')
-        country = 'Poland' # Ustaw domyślną wartość Polska, jeśli nie zostanie przekazana
+        country = 'Poland'  # Ustaw domyślną wartość Polska, jeśli nie zostanie przekazana
+
+        # Generowanie koordynatów na podstawie adresu użytkownika
+        latitude, longitude = get_coordinates(default_address, default_location)
 
         # Połączenie z bazą danych
         conn = sqlite3.connect('msbox_database.db')
@@ -36,9 +40,9 @@ def register(request):
 
             # Wstawienie danych do tabeli PERSONAL_DATA
             cursor.execute("""
-            INSERT INTO PERSONAL_DATA (UserId, FirstName, LastName, BirthDate, Sex, DefaultAddress, DefaultPostalcode, DefaultLocation, Phone, Country)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """, (user_id, first_name, last_name, birth_date, sex, default_address, default_postalcode, default_location, phone, country))
+            INSERT INTO PERSONAL_DATA (UserId, FirstName, LastName, BirthDate, Sex, DefaultAddress, DefaultPostalcode, DefaultLocation, Phone, Country, Latitude, Longitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """, (user_id, first_name, last_name, birth_date, sex, default_address, default_postalcode, default_location, phone, country, latitude, longitude))
 
             # Wstawienie danych do tabeli USER_ROLE
             cursor.execute("""

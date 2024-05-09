@@ -12,7 +12,8 @@ tables_to_keep = [
     'django_content_type',
     'auth_permission',
     'auth_group',
-    'auth_user'
+    'auth_user', 
+    'sqlite_sequence'
 ]
 
 # Pobranie nazw wszystkich tabel w bazie danych
@@ -23,7 +24,7 @@ all_tables = cursor.fetchall()
 for table in all_tables:
     table_name = table[0]
     if table_name not in tables_to_keep:
-        cursor.execute("DELETE FROM {}".format(table_name))
+        cursor.execute("DROP TABLE {}".format(table_name))
 
 # Creating tables from schema
 
@@ -50,6 +51,8 @@ CREATE TABLE IF NOT EXISTS PERSONAL_DATA (
   DefaultLocation VARCHAR(30) NOT NULL,
   Phone VARCHAR(30) NOT NULL,
   Country VARCHAR(30) NOT NULL,
+  Latitude DECIMAL(4,20) NOT NULL,
+  Longitude DECIMAL(4,20) NOT NULL,
   FOREIGN KEY (UserId) REFERENCES User(Id)
 );
 '''
@@ -61,7 +64,9 @@ CREATE TABLE IF NOT EXISTS MACHINE (
   PostalCode VARCHAR(30) NOT NULL,
   Location VARCHAR(30) NOT NULL,
   Country VARCHAR(30) NOT NULL,
-  IsMobile BOOLEAN NOT NULL
+  IsMobile BOOLEAN NOT NULL,
+  Latitude DECIMAL(4,20) NOT NULL,
+  Longitude DECIMAL(4,20) NOT NULL
 );
 '''
 
@@ -158,6 +163,14 @@ CREATE TABLE IF NOT EXISTS ORDER_ (
   FOREIGN KEY (PaymentMethodId) REFERENCES PaymentMethod(Id)
 );
 '''
+create_table_order_chamber ='''
+CREATE TABLE IF NOT EXISTS ORDER_CHAMBER (
+  OrderId INTEGER NOT NULL,
+  ChamberId INTEGER NOT NULL,
+  FOREIGN KEY (OrderId) REFERENCES ORDER_(Id),
+  FOREIGN KEY (ChamberId) REFERENCES CHAMBER(Id)
+);
+'''
 
 # Executing table create commands
 cursor.execute(create_table_user)
@@ -171,7 +184,7 @@ cursor.execute(create_table_role)
 cursor.execute(create_table_status)
 cursor.execute(create_table_user_role)
 cursor.execute(create_table_order)
-
+cursor.execute(create_table_order_chamber)
 
 # Filling created tables with data
 
@@ -232,114 +245,114 @@ VALUES
 
 insert_personal_data = '''
 INSERT INTO PERSONAL_DATA (UserId, FirstName, LastName, BirthDate, 
-Sex, DefaultAddress, DefaultPostalcode, DefaultLocation, Phone, Country)
+Sex, DefaultAddress, DefaultPostalcode, DefaultLocation, Phone, Country, Latitude, Longitude)
 VALUES
-(1, 'Krzysztof', 'Duda', '1985-03-12', 0, 'Kwiatowa 12', '01-234', 'Warszawa', '48501234567', 'Poland'),
-(2, 'Ireneusz', 'Sikorski', '1978-09-28', 0, 'Słoneczna 7', '45-678', 'Wrocław', '48502345678', 'Poland'),
-(3, 'Fabian', 'Gajewski', '1982-07-19', 0, 'Lipowa 23', '90-123', 'Łódź', '48503456789', 'Poland'),
-(4, 'Kamil', 'Głowacki', '1987-11-05', 0, 'Brzozowa 5', '80-456', 'Gdańsk', '48504567890', 'Poland'),
-(5, 'Natan', 'Głowacki', '1986-08-09', 0, 'Akacjowa 9', '33-210', 'Kraków', '48505678901', 'Poland'),
-(6, 'Konstanty', 'Stępień', '1980-06-23', 0, 'Topolowa 18', '50-789', 'Poznań', '48506789012', 'Poland'),
-(7, 'Aleksander', 'Bąk', '1983-05-14', 0, 'Dąbrowa 3', '22-345', 'Lublin', '48507890123', 'Poland'),
-(8, 'Bartłomiej', 'Walczak', '1981-12-07', 0, 'Jasna 14', '60-567', 'Szczecin', '48508901234', 'Poland'),
-(9, 'Henryk', 'Szymczak', '1984-04-30', 0, 'Świerkowa 2', '70-890', 'Bydgoszcz', '48509012345', 'Poland'),
-(10, 'Adrian', 'Tomaszewski', '1988-02-18', 0, 'Cicha 11', '10-111', 'Olsztyn', '48510123456', 'Poland'),
-(11, 'Gracjan', 'Gajewski', '1983-03-03', 0, 'Wiosenna 6', '55-432', 'Katowice', '48511234567', 'Poland'),
-(12, 'Błażej', 'Kalinowski', '1985-09-09', 0, 'Malinowa 15', '44-333', 'Rzeszów', '48512345678', 'Poland'),
-(13, 'Kewin', 'Marciniak', '1982-07-22', 0, 'Klonowa 20', '66-789', 'Zielona Góra', '48513456789', 'Poland'),
-(14, 'Kryspin', 'Krupa', '1987-11-11', 0, 'Sosnowa 4', '30-987', 'Białystok', '48514567890', 'Poland'),
-(15, 'Kacper', 'Sobczak', '1986-08-29', 0, 'Żurawia 8', '88-765', 'Toruń', '48515678901', 'Poland'),
-(16, 'Eryk', 'Kaźmierczak', '1980-06-05', 0, 'Kościelna 17', '11-222', 'Suwałki', '48516789012', 'Poland'),
-(17, 'Konstanty', 'Zieliński', '1983-05-17', 0, 'Miodowa 1', '99-000', 'Opole', '48517890123', 'Poland'),
-(18, 'Norbert', 'Dąbrowski', '1981-12-02', 0, 'Kwiatowa 10', '02-345', 'Warszawa', '48518901234', 'Poland'),
-(19, 'Klaudiusz', 'Adamski', '1984-04-25', 0, 'Słoneczna 5', '46-789', 'Wrocław', '48519012345', 'Poland'),
-(20, 'Gracjan', 'Sobczak', '1988-02-13', 0, 'Lipowa 21', '91-234', 'Łódź', '48520123456', 'Poland'),
-(21, 'Jacek', 'Przybylski', '1983-03-08', 0, 'Brzozowa 3', '81-567', 'Gdańsk', '48521234567', 'Poland'),
-(22, 'Bogumił', 'Duda', '1985-09-10', 0, 'Akacjowa 7', '34-210', 'Kraków', '48522345678', 'Poland'),
-(23, 'Kornel', 'Tomaszewski', '1982-07-21', 0, 'Topolowa 16', '51-789', 'Poznań', '48523456789', 'Poland'),
-(24, 'Daniel', 'Kowalski', '1987-11-06', 0, 'Dąbrowa 1', '23-345', 'Lublin', '48524567890', 'Poland'),
-(25, 'Kordian', 'Zieliński', '1986-08-20', 0, 'Jasna 12', '61-567', 'Szczecin', '48525678901', 'Poland'),
-(26, 'Józefa', 'Ostrowska', '1980-06-04', 1, 'Świerkowa 1', '71-890', 'Bydgoszcz', '48526789012', 'Poland'),
-(27, 'Anna', 'Sobczak', '1983-05-16', 1, 'Cicha 10', '11-110', 'Olsztyn', '48527890123', 'Poland'),
-(28, 'Natasza', 'Jakubowska', '1981-12-01', 1, 'Wiosenna 5', '56-432', 'Katowice', '48528901234', 'Poland'),
-(29, 'Alina', 'Pawlak', '1984-04-24', 1, 'Malinowa 14', '45-333', 'Rzeszów', '48529012345', 'Poland'),
-(30, 'Kaja', 'Mazur', '1988-02-12', 1, 'Klonowa 19', '67-789', 'Zielona Góra', '48530123456', 'Poland'),
-(31, 'Bogusława', 'Wiśniewska', '1983-03-07', 1, 'Sosnowa 3', '31-987', 'Białystok', '48531234567', 'Poland'),
-(32, 'Zofia', 'Sikorska', '1985-09-11', 1, 'Żurawia 7', '89-765', 'Toruń', '48532345678', 'Poland'),
-(33, 'Amanda', 'Adamska', '1982-07-20', 1, 'Kościelna 16', '12-222', 'Suwałki', '48533456789', 'Poland'),
-(34, 'Irena', 'Cieślak', '1987-11-01', 1, 'Miodowa 2', '98-000', 'Opole', '48534567890', 'Poland'),
-(35, 'Róża', 'Duda', '1986-08-24', 1, 'Kwiatowa 11', '03-345', 'Warszawa', '48535678901', 'Poland'),
-(36, 'Urszula', 'Baranowska', '1980-06-05', 1, 'Słoneczna 6', '47-789', 'Wrocław', '48536789012', 'Poland'),
-(37, 'Joanna', 'Urbańska', '1983-05-17', 1, 'Lipowa 22', '92-234', 'Łódź', '48537890123', 'Poland'),
-(38, 'Arleta', 'Nowak', '1981-12-08', 1, 'Brzozowa 4', '82-567', 'Gdańsk', '48538901234', 'Poland'),
-(39, 'Cecylia', 'Zakrzewska', '1984-04-30', 1, 'Akacjowa 8', '35-210', 'Kraków', '48539012345', 'Poland'),
-(40, 'Monika', 'Ziółkowska', '1988-02-18', 1, 'Topolowa 17', '52-789', 'Poznań', '48540123456', 'Poland'),
-(41, 'Martyna', 'Zawadzka', '1983-03-03', 1, 'Dąbrowa 2', '24-345', 'Lublin', '48541234567', 'Poland'),
-(42, 'Eleonora', 'Zielińska', '1985-09-09', 1, 'Jasna 13', '62-567', 'Szczecin', '48542345678', 'Poland'),
-(43, 'Amelia', 'Sikora', '1982-07-22', 1, 'Świerkowa 3', '72-890', 'Bydgoszcz', '48543456789', 'Poland'),
-(44, 'Adriana', 'Baran', '1987-11-11', 1, 'Cicha 9', '12-111', 'Olsztyn', '48544567890', 'Poland'),
-(45, 'Elena', 'Witkowska', '1986-08-29', 1, 'Wiosenna 4', '57-432', 'Katowice', '48545678901', 'Poland'),
-(46, 'Wanda', 'Pawlak', '1980-06-05', 1, 'Malinowa 13', '46-333', 'Rzeszów', '48546789012', 'Poland'),
-(47, 'Julianna', 'Zalewska', '1983-05-17', 1, 'Klonowa 18', '68-789', 'Zielona Góra', '48547890123', 'Poland'),
-(48, 'Elena', 'Jaworska', '1981-12-02', 1, 'Sosnowa 2', '32-987', 'Białystok', '48548901234', 'Poland'),
-(49, 'Judyta', 'Zalewska', '1984-04-25', 1, 'Żurawia 6', '87-765', 'Toruń', '48549012345', 'Poland'),
-(50, 'Teresa', 'Makowska', '1988-02-13', 1, 'Kościelna 15', '13-222', 'Suwałki', '48550123456', 'Poland')
+(1, 'Krzysztof', 'Duda', '1985-03-12', 0, 'Sienkiewicza 10', '65-001', 'Zielona Góra', '48501234567', 'Poland', 51.93276135, 15.510587489789993),
+(2, 'Ireneusz', 'Sikorski', '1978-09-28', 0, 'Ruska 12', '50-079', 'Wrocław', '48502345678', 'Poland', 51.1103668, 17.0273302),
+(3, 'Fabian', 'Gajewski', '1982-07-19', 0, 'Świdnicka 15', '50-066', 'Wrocław', '48503456789', 'Poland', 50.899023299999996, 16.742201215686322),
+(4, 'Kamil', 'Głowacki', '1987-11-05', 0, 'Piłsudskiego 20', '50-019', 'Wrocław', '48504567890', 'Poland', 51.1031937, 17.0246095),
+(5, 'Natan', 'Głowacki', '1986-08-09', 0, 'Grunwaldzka 30', '50-365', 'Wrocław', '48505678901', 'Poland', 51.1143167, 17.058499211600513),
+(6, 'Konstanty', 'Stępień', '1980-06-23', 0, 'Mickiewicza 5', '87-100', 'Toruń', '48506789012', 'Poland', 53.01158245, 18.595328332672782),
+(7, 'Aleksander', 'Bąk', '1983-05-14', 0, 'Monte Cassino 8', '70-467', 'Szczecin', '48507890123', 'Poland', 53.4337018, 14.5434505),
+(8, 'Bartłomiej', 'Walczak', '1981-12-07', 0, 'Portowa 25', '71-241', 'Szczecin', '48508901234', 'Poland', 53.3959683, 14.672424274148572),
+(9, 'Henryk', 'Szymczak', '1984-04-30', 0, 'Wojska Polskiego 11', '71-251', 'Szczecin', '48509012345', 'Poland', 53.4271337, 14.5455521),
+(10, 'Adrian', 'Tomaszewski', '1988-02-18', 0, 'Tadeusza Kościuszki 3', '16-400', 'Suwałki', '48510123456', 'Poland', 54.0940996, 22.92859973856308),
+(11, 'Gracjan', 'Gajewski', '1983-03-03', 0, 'Mickiewicza 7', '16-400', 'Suwałki', '48511234567', 'Poland', 54.09870025, 22.925966679374532),
+(12, 'Błażej', 'Kalinowski', '1985-09-09', 0, 'Kościuszki 12', '16-400', 'Suwałki', '48512345678', 'Poland', 54.09518575, 22.929227205236636),
+(13, 'Kewin', 'Marciniak', '1982-07-22', 0, 'Piłsudskiego 9', '35-010', 'Rzeszów', '48513456789', 'Poland', 50.038827850000004, 22.01266409490932),
+(14, 'Kryspin', 'Krupa', '1987-11-11', 0, 'Dąbrowskiego 14', '35-010', 'Rzeszów', '48514567890', 'Poland', 50.031239049999996, 21.99554514360903),
+(15, 'Kacper', 'Sobczak', '1986-08-29', 0, 'Półwiejska 10', '61-884', 'Poznań', '48515678901', 'Poland', 52.4037798, 16.9301429),
+(16, 'Eryk', 'Kaźmierczak', '1980-06-05', 0, 'Wielka 5', '61-774', 'Poznań', '48516789012', 'Poland', 52.4087009, 16.9355795),
+(17, 'Konstanty', 'Zieliński', '1983-05-17', 0, 'Garbary 20', '61-866', 'Poznań', '48517890123', 'Poland', 52.4066079, 16.9372258),
+(18, 'Norbert', 'Dąbrowski', '1981-12-02', 0, 'Stary Rynek 15', '61-742', 'Poznań', '48518901234', 'Poland', 52.4080519, 16.9340465),
+(19, 'Klaudiusz', 'Adamski', '1984-04-25', 0, 'Piastowska 2', '45-040', 'Opole', '48519012345', 'Poland', 50.6689994, 17.918085421315077),
+(20, 'Gracjan', 'Sobczak', '1988-02-13', 0, 'Partyzantów 8', '10-220', 'Olsztyn', '48520123456', 'Poland', 53.7832896, 20.4911273),
+(21, 'Jacek', 'Przybylski', '1983-03-08', 0, 'Pstrowskiego 14', '10-222', 'Olsztyn', '48521234567', 'Poland', 53.7637214, 20.488770370235237),
+(22, 'Bogumił', 'Duda', '1985-09-10', 0, 'Piotrkowska 67', '90-102', 'Łódź', '48522345678', 'Poland', 51.7682834, 19.4552498),
+(23, 'Kornel', 'Tomaszewski', '1982-07-21', 0, 'Narutowicza 12', '91-454', 'Łódź', '48523456789', 'Poland', 51.77095975, 19.45820946797277),
+(24, 'Daniel', 'Kowalski', '1987-11-06', 0, 'Mickiewicza 30', '92-342', 'Łódź', '48524567890', 'Poland', 51.3158857, 18.9896551),
+(25, 'Kordian', 'Zieliński', '1986-08-20', 0, 'Sienkiewicza 15', '91-001', 'Łódź', '48525678901', 'Poland', 51.76927475, 19.460642134271787),
+(26, 'Józefa', 'Ostrowska', '1980-06-04', 1, 'Narutowicza 55', '20-007', 'Lublin', '48526789012', 'Poland', 51.2427608, 22.555872963779386),
+(27, 'Anna', 'Sobczak', '1983-05-16', 1, 'Krakowskie Przedmieście 25', '20-001', 'Lublin', '48527890123', 'Poland', 51.2480083, 22.5624573),
+(28, 'Natasza', 'Jakubowska', '1981-12-01', 1, 'Chopina 8', '20-024', 'Lublin', '48528901234', 'Poland', 51.2460241, 22.5542098),
+(29, 'Alina', 'Pawlak', '1984-04-24', 1, 'Głęboka 10', '20-612', 'Lublin', '48529012345', 'Poland', 51.2399806, 22.5485951),
+(30, 'Kaja', 'Mazur', '1988-02-12', 1, 'Armii Krajowej 15', '20-215', 'Lublin', '48530123456', 'Poland', 51.23468455, 22.51190618054772),
+(31, 'Bogusława', 'Wiśniewska', '1983-03-07', 1, 'Prusa 22', '20-002', 'Lublin', '48531234567', 'Poland', 51.2344394, 22.5334332),
+(32, 'Zofia', 'Sikorska', '1985-09-11', 1, 'Floriańska 10', '31-021', 'Kraków', '48532345678', 'Poland', 50.0627648, 19.9395856),
+(33, 'Amanda', 'Adamska', '1982-07-20', 1, 'Szewska 5', '31-009', 'Kraków', '48533456789', 'Poland', 50.0623619, 19.9357135),
+(34, 'Irena', 'Cieślak', '1987-11-01', 1, 'Grodzka 15', '31-006', 'Kraków', '48534567890', 'Poland', 50.059404, 19.9377026),
+(35, 'Róża', 'Duda', '1986-08-24', 1, 'Basztowa 20', '31-143', 'Kraków', '48535678901', 'Poland', 50.0656865, 19.9423821),
+(36, 'Urszula', 'Baranowska', '1980-06-05', 1, 'Podzamcze 8', '31-001', 'Kraków', '48536789012', 'Poland', 50.056064649999996, 19.936023768120414),
+(37, 'Joanna', 'Urbańska', '1983-05-17', 1, 'Piłsudskiego 18', '31-109', 'Kraków', '48537890123', 'Poland', 50.05961, 19.92933398409246),
+(38, 'Arleta', 'Nowak', '1981-12-08', 1, 'Św.  Gertrudy 7', '31-021', 'Kraków', '48538901234', 'Poland', 50.0578639, 19.9408498),
+(39, 'Cecylia', 'Zakrzewska', '1984-04-30', 1, 'Warszawska 5', '40-010', 'Katowice', '48539012345', 'Poland', 50.2589084, 19.023940673260114),
+(40, 'Monika', 'Ziółkowska', '1988-02-18', 1, 'Długa 20', '80-827', 'Gdańsk', '48540123456', 'Poland', 54.34911485, 18.650020219933126),
+(41, 'Martyna', 'Zawadzka', '1983-03-03', 1, 'Mariacka 15', '80-743', 'Gdańsk', '48541234567', 'Poland', 54.34911485, 18.650020219933126),
+(42, 'Eleonora', 'Zielińska', '1985-09-09', 1, 'Jana z Kolna 30', '80-245', 'Gdańsk', '48542345678', 'Poland', 54.349512399999995, 18.65529008882367),
+(43, 'Amelia', 'Sikora', '1982-07-22', 1, 'Kościuszki 22', '80-456', 'Gdańsk', '48543456789', 'Poland', 54.3625115, 18.644829266748772),
+(44, 'Adriana', 'Baran', '1987-11-11', 1, 'Wały Jagiellońskie 8', '80-753', 'Gdańsk', '48544567890', 'Poland', 54.3867914, 18.607283444021306),
+(45, 'Elena', 'Witkowska', '1986-08-29', 1, 'Gdańska 67', '85-006', 'Bydgoszcz', '48545678901', 'Poland', 54.35088415, 18.646832467489332),
+(46, 'Wanda', 'Pawlak', '1980-06-05', 1, 'Mostowa 12', '85-104', 'Bydgoszcz', '48546789012', 'Poland', 53.1308587, 18.0084087),
+(47, 'Julianna', 'Zalewska', '1983-05-17', 1, 'Dworcowa 25', '85-006', 'Bydgoszcz', '48547890123', 'Poland', 53.0378108, 17.9651158),
+(48, 'Elena', 'Jaworska', '1981-12-02', 1, 'Jagiellońska 30', '85-035', 'Bydgoszcz', '48548901234', 'Poland', 53.1272024, 17.9997705),
+(49, 'Judyta', 'Zalewska', '1984-04-25', 1, 'Lipowa 15', '15-424', 'Białystok', '48549012345', 'Poland', 53.122927700000005, 18.010881403925488),
+(50, 'Teresa', 'Makowska', '1988-02-13', 1, 'Sienkiewicza 10', '15-001', 'Białystok', '48550123456', 'Poland', 53.1327256, 23.15447829116575)
 '''
 
 insert_machine = '''
-INSERT INTO MACHINE (Address, PostalCode, Location, Country, IsMobile)
+INSERT INTO MACHINE (Address, PostalCode, Location, Country, IsMobile, Latitude, Longitude)
 VALUES
-('Kopernika 17', '90-001', 'Łódź', 'Poland', 0),
-('Trzech Krzyży 14', '80-001', 'Gdańsk', 'Poland', 0),
-('Jackowskiego 15', '60-999', 'Poznań', 'Poland', 0),
-('Solidarności 25', '87-222', 'Toruń', 'Poland', 0),
-('Kraszewskiego 6', '31-999', 'Kraków', 'Poland', 0),
-('Grunwaldzki 22', '50-765', 'Wrocław', 'Poland', 0),
-('Narutowicza 10', '85-345', 'Bydgoszcz', 'Poland', 0),
-('Wyzwolenia 8', '65-001', 'Zielona Góra', 'Poland', 0),
-('Wolności 5', '10-222', 'Olsztyn', 'Poland', 0),
-('Mickiewicza 3', '20-765', 'Lublin', 'Poland', 0),
-('Zwycięstwa 11', '40-999', 'Katowice', 'Poland', 0),
-('Dąbrowskiego 9', '35-001', 'Rzeszów', 'Poland', 0),
-('Monte Cassino 15', '70-222', 'Szczecin', 'Poland', 0),
-('Chmielna 23', '80-345', 'Gdańsk', 'Poland', 0),
-('Niepodległości 5', '50-765', 'Wrocław', 'Poland', 0),
-('Matejki 12', '30-999', 'Kraków', 'Poland', 0),
-('Piastowska 7', '15-001', 'Białystok', 'Poland', 0),
-('Sobieskiego 18', '10-222', 'Suwałki', 'Poland', 0),
-('Paderewskiego 29', '45-999', 'Opole', 'Poland', 0),
-('Kopernika 17', '80-001', 'Kraków', 'Poland', 0),
-('Trzech Krzyży 14', '85-345', 'Lublin', 'Poland', 0),
-('Jackowskiego 15', '70-999', 'Wrocław', 'Poland', 0),
-('Solidarności 25', '90-222', 'Łódź', 'Poland', 0),
-('Kraszewskiego 6', '80-001', 'Gdańsk', 'Poland', 0),
-('Grunwaldzki 22', '70-765', 'Szczecin', 'Poland', 0),
-('Narutowicza 10', '87-222', 'Bydgoszcz', 'Poland', 0),
-('Wyzwolenia 8', '10-001', 'Olsztyn', 'Poland', 0),
-('Wolności 5', '40-765', 'Poznań', 'Poland', 0),
-('Mickiewicza 3', '31-999', 'Kraków', 'Poland', 0),
-('Zwycięstwa 11', '90-001', 'Łódź', 'Poland', 0),
-('Dąbrowskiego 9', '80-345', 'Suwałki', 'Poland', 0),
-('Monte Cassino 15', '45-999', 'Szczecin', 'Poland', 0),
-('Chmielna 23', '85-345', 'Bydgoszcz', 'Poland', 0),
-('Paderewskiego 29', '60-999', 'Lublin', 'Poland', 0),
-('Sobieskiego 18', '87-222', 'Gdańsk', 'Poland', 0),
-('Kopernika 17', '80-001', 'Kraków', 'Poland', 0),
-('Trzech Krzyży 14', '10-001', 'Łódź', 'Poland', 0),
-('Jackowskiego 15', '70-999', 'Poznań', 'Poland', 0),
-('Solidarności 25', '80-001', 'Gdańsk', 'Poland', 0),
-('Kraszewskiego 6', '85-345', 'Wrocław', 'Poland', 0),
-('Grunwaldzki 22', '90-222', 'Rzeszów', 'Poland', 0),
-('Narutowicza 10', '87-222', 'Lublin', 'Poland', 0),
-('Wyzwolenia 8', '50-765', 'Bydgoszcz', 'Poland', 0),
-('Wolności 5', '40-765', 'Lublin', 'Poland', 0),
-('Mickiewicza 3', '60-999', 'Kraków', 'Poland', 0),
-('Zwycięstwa 11', '15-001', 'Białystok', 'Poland', 0),
-('Dąbrowskiego 9', '10-222', 'Suwałki', 'Poland', 0),
-('Monte Cassino 15', '31-999', 'Lublin', 'Poland', 0),
-('Chmielna 23', '90-222', 'Poznań', 'Poland', 0),
-('Paderewskiego 29', '80-001', 'Kraków', 'Poland', 0),
-('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 0)
+('Kopernika 17', '90-001', 'Łódź', 'Poland', 0, 51.7626561, 19.44890699288188),
+('Długa 20', '80-827', 'Gdańsk', 'Poland', 0, 54.34911485, 18.650020219933126),
+('Jackowskiego 15', '60-999', 'Poznań', 'Poland', 0, 52.4099815, 16.9002328),
+('Solidarności 25', '87-222', 'Toruń', 'Poland', 0, 53.0622184, 18.5557846),
+('Kraszewskiego 6', '31-999', 'Kraków', 'Poland', 0, 50.05516875, 19.919510681992577),
+('Grunwaldzki 22', '50-765', 'Wrocław', 'Poland', 0, 51.11257535, 17.059312826388005),
+('Narutowicza 10', '85-345', 'Bydgoszcz', 'Poland', 0, 53.1239242, 17.9973656),
+('Sienkiewicza 10', '65-001', 'Zielona Góra', 'Poland', 0, 51.93276135, 15.510587489789993),
+('Wolności 5', '10-222', 'Olsztyn', 'Poland', 0, 53.9775292, 20.736548262569045),
+('Mickiewicza 3', '20-765', 'Lublin', 'Poland', 0, 50.526568350000005, 22.715545337178625),
+('Warszawska 5', '40-010', 'Katowice', 'Poland', 0, 50.2589084, 19.023940673260114),
+('Dąbrowskiego 9', '35-001', 'Rzeszów', 'Poland', 0, 50.03158955, 21.996791988495275),
+('Monte Cassino 15', '70-222', 'Szczecin', 'Poland', 0, 53.4364957, 14.5413604),
+('Chmielna 23', '80-345', 'Gdańsk', 'Poland', 0, 54.3428414, 18.6526102),
+('Niepodległości 5', '50-765', 'Wrocław', 'Poland', 0, 51.163302, 17.124518),
+('Matejki 12', '30-999', 'Kraków', 'Poland', 0, 50.0668429, 19.9419095),
+('Piastowska 7', '15-001', 'Białystok', 'Poland', 0, 53.12902575, 23.186556566156263),
+('Sobieskiego 18', '10-222', 'Suwałki', 'Poland', 0, 54.100846, 22.9039146),
+('Paderewskiego 29', '45-999', 'Opole', 'Poland', 0, 50.6575039, 17.9580941),
+('Kopernika 17', '80-001', 'Kraków', 'Poland', 0, 50.0621335, 19.9500487),
+('Trzech Krzyży 14', '85-345', 'Lublin', 'Poland', 0, 52.02322155, 23.114772262440766),
+('Jackowskiego 15', '70-999', 'Wrocław', 'Poland', 0, 51.1050054, 17.1064791),
+('Solidarności 25', '90-222', 'Łódź', 'Poland', 0, 51.7268013, 19.5031751),
+('Kraszewskiego 6', '80-001', 'Gdańsk', 'Poland', 0, 54.3884241, 18.612474465822785),
+('Grunwaldzki 22', '70-765', 'Szczecin', 'Poland', 0, 53.4326903, 14.5490492),
+('Narutowicza 10', '87-222', 'Bydgoszcz', 'Poland', 0, 53.1239242, 17.9973656),
+('Wyzwolenia 8', '10-001', 'Olsztyn', 'Poland', 0, 53.77892025, 20.47700581290064),
+('Wolności 5', '40-765', 'Poznań', 'Poland', 0, 52.4076949, 16.9270247),
+('Mickiewicza 3', '31-999', 'Kraków', 'Poland', 0, 50.0433663, 19.9488194),
+('Zwycięstwa 11', '90-001', 'Łódź', 'Poland', 0, 51.7395409, 19.8113796),
+('Dąbrowskiego 9', '80-345', 'Suwałki', 'Poland', 0, 50.031239049999996, 21.99554514360903),
+('Monte Cassino 15', '45-999', 'Szczecin', 'Poland', 0, 53.4364957, 14.5413604),
+('Chmielna 23', '85-345', 'Bydgoszcz', 'Poland', 0, 53.1535165, 17.9620948),
+('Paderewskiego 29', '60-999', 'Lublin', 'Poland', 0, 50.43706935, 23.41395998586097),
+('Sobieskiego 18', '87-222', 'Gdańsk', 'Poland', 0, 54.3667621, 18.61358590607766),
+('Kopernika 17', '80-001', 'Kraków', 'Poland', 0, 50.0621335, 19.9500487),
+('Mickiewicza 30', '92-342', 'Łódź', 'Poland', 0, 51.585563300000004, 19.127945599067203),
+('Jackowskiego 15', '70-999', 'Poznań', 'Poland', 0, 52.4099815, 16.9002328),
+('Solidarności 25', '80-001', 'Gdańsk', 'Poland', 0, 54.360330950000005, 18.64910718757669),
+('Kraszewskiego 6', '85-345', 'Wrocław', 'Poland', 0, 51.12826055, 17.035641905227532),
+('Dąbrowskiego 14', '35-010', 'Rzeszów', 'Poland', 0, 50.031239049999996, 21.99554514360903),
+('Narutowicza 10', '87-222', 'Lublin', 'Poland', 0, 51.2456529, 22.5617436),
+('Wyzwolenia 8', '50-765', 'Bydgoszcz', 'Poland', 0, 53.1513994, 18.1720457),
+('Wolności 5', '40-765', 'Lublin', 'Poland', 0, 50.541826, 23.218545971504103),
+('Mickiewicza 3', '60-999', 'Kraków', 'Poland', 0, 50.0433663, 19.9488194),
+('Zwycięstwa 11', '15-001', 'Białystok', 'Poland', 0, 53.135331300000004, 23.130558099999995),
+('Dąbrowskiego 9', '10-222', 'Suwałki', 'Poland', 0, 54.072635500000004, 22.925814599999995),
+('Monte Cassino 15', '31-999', 'Lublin', 'Poland', 0, 51.2545712, 22.5151882),
+('Chmielna 23', '90-222', 'Poznań', 'Poland', 0, 52.4685244, 16.8969528),
+('Paderewskiego 29', '80-001', 'Kraków', 'Poland', 0, 50.0664772, 19.9418835),
+('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 0, 54.3667621, 18.61358590607766)
 '''
 
 insert_chamber = '''
@@ -1954,6 +1967,7 @@ truncate_order = 'DELETE FROM ORDER_'
 truncate_favourite_machines = 'DELETE FROM FAVOURITE_MACHINES'
 truncate_role = 'DELETE FROM ROLE'
 truncate_user_role = 'DELETE FROM USER_ROLE'
+truncate_order_chamber = 'DELETE FROM ORDER_CHAMBER'
 
 cursor.execute(truncate_user)
 cursor.execute(truncate_personal_data)

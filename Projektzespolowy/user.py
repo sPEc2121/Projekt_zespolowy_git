@@ -75,11 +75,6 @@ def disable_user(request):
     # Zwrócenie odpowiedzi JSON w przypadku żądania innego niż PUT
     return JsonResponse({'error': 'Metoda nieobsługiwana lub brak uprawnień.'}, status=405)
 
-
-from django.http import JsonResponse
-import sqlite3
-from middlewares import login_required
-
 @login_required
 def get_user_by_id(request, user_id):
     conn = sqlite3.connect('msbox_database.db')
@@ -98,7 +93,9 @@ def get_user_by_id(request, user_id):
         PERSONAL_DATA.DefaultPostalcode, 
         PERSONAL_DATA.DefaultLocation, 
         PERSONAL_DATA.Phone, 
-        PERSONAL_DATA.Country 
+        PERSONAL_DATA.Country,
+        PERSONAL_DATA.Latitude,
+        PERSONAL_DATA.Longitude           
     FROM USER 
     LEFT JOIN PERSONAL_DATA 
     ON USER.Id = PERSONAL_DATA.UserId 
@@ -122,7 +119,9 @@ def get_user_by_id(request, user_id):
             'DefaultPostalcode': user_data[9],
             'DefaultLocation': user_data[10],
             'Phone': user_data[11],
-            'Country': user_data[12]
+            'Country': user_data[12],
+            'Latitude': user_data[13],
+            'Longitude': user_data[14]
         }
         return JsonResponse(user_dict)
     else:
