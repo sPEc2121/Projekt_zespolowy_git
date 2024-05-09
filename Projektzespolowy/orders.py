@@ -24,6 +24,7 @@ def get_all_orders(request):
             ORDER_.EndDate, 
             ORDER_.MachineIdFrom, 
             ORDER_.MachineIdTo, 
+            CHAMBER.Id AS ChamberId, 
             ORDER_.DeliveryDate, 
             ORDER_.ReturnDeliveryDate, 
             ORDER_.Postponed, 
@@ -73,16 +74,18 @@ def get_all_orders(request):
             'EndDate': order[9],
             'MachineIdFrom': order[10],
             'MachineIdTo': order[11],
-            'DeliveryDate': order[12],
-            'ReturnDeliveryDate': order[13],
-            'Postponed': bool(order[14]),
-            'PostponedDays': order[15],
-            'IsReturn': bool(order[16]),
-            'DeliveryCost': order[17]
+            'ChamberId': order[12],
+            'DeliveryDate': order[13],
+            'ReturnDeliveryDate': order[14],
+            'Postponed': bool(order[15]),
+            'PostponedDays': order[16],
+            'IsReturn': bool(order[17]),
+            'DeliveryCost': order[18]
         }
         orders_list.append(order_dict)
 
     return JsonResponse(orders_list, safe=False)
+
 
 @login_required
 def create_order(request):
@@ -123,7 +126,7 @@ def create_order(request):
                     CHAMBER.Size = ? AND 
                     CHAMBER.Status = 0 
                 LIMIT 1
-            """, (machine_id_from, size))
+            """, (machine_id_to, size))
             chamber = cursor.fetchone()
 
             if chamber is not None:
@@ -177,6 +180,20 @@ def create_order(request):
                     delivery_cost
                 ))
 
+                # Pobierz id utworzonego zamówienia
+                order_id = cursor.lastrowid
+
+                # Wstaw rekord do tabeli ORDER_CHAMBER
+                cursor.execute("""
+                    INSERT INTO ORDER_CHAMBER (
+                        OrderId, 
+                        ChamberId
+                    ) VALUES (?, ?)
+                """, (
+                    order_id,
+                    chamber_id
+                ))
+
                 # Zatwierdź transakcję
                 conn.commit()
                 conn.close()
@@ -197,3 +214,99 @@ def create_order(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+    
+
+@login_required
+def get_user_orders(request, user_id):
+    conn = sqlite3.connect('msbox_database.db')
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            ORDER_.Id, 
+            STATUS.StatusName, 
+            Sender.Mail AS SenderMail, 
+            Receiver.Mail AS ReceiverMail, 
+            CHAMBER.Id AS ChamberId, 
+            PAYMENT_METHOD.PaymentName, 
+            ORDER_.Description, 
+            ORDER_.Active, 
+            ORDER_.StartDate, 
+            ORDER_.EndDate, 
+            UPPER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(SUBSTR(MACHINE_FROM.Location, 1, 3), 'ą', 'A'), 'ć', 'C'), 'ę', 'E'), 'ł', 'L'), 'ń', 'N'), 'ó', 'O'), 'ś', 'S'), 'ź', 'Z'), 'ż', 'Z'), 'Ą', 'A'), 'Ć', 'C'), 'Ę', 'E'), 'Ł', 'L'), 'Ń', 'N'), 'Ó', 'O'), 'Ś', 'S'), 'Ź', 'Z'), 'Ż', 'Z')) || MACHINE_FROM.Id AS MachineCodeFrom,
+            UPPER(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(SUBSTR(MACHINE_TO.Location, 1, 3), 'ą', 'A'), 'ć', 'C'), 'ę', 'E'), 'ł', 'L'), 'ń', 'N'), 'ó', 'O'), 'ś', 'S'), 'ź', 'Z'),'ż', 'Z'), 'Ą', 'A'), 'Ć', 'C'), 'Ę', 'E'), 'Ł', 'L'), 'Ń', 'N'), 'Ó', 'O'), 'Ś', 'S'), 'Ź', 'Z'), 'Ż', 'Z')) || MACHINE_TO.Id AS MachineCodeTo,
+            ORDER_.DeliveryDate, 
+            ORDER_.ReturnDeliveryDate, 
+            ORDER_.Postponed, 
+            ORDER_.PostponedDays, 
+            ORDER_.IsReturn, 
+            ORDER_.DeliveryCost 
+        FROM 
+            ORDER_ 
+        LEFT JOIN 
+            STATUS 
+        ON 
+            ORDER_.StatusId = STATUS.Id 
+        LEFT JOIN 
+            USER AS Sender 
+        ON 
+            ORDER_.SenderId = Sender.Id 
+        LEFT JOIN 
+            USER AS Receiver 
+        ON 
+            ORDER_.ReceiverId = Receiver.Id 
+        LEFT JOIN 
+            CHAMBER 
+        ON 
+            ORDER_.ChamberId = CHAMBER.Id 
+        LEFT JOIN 
+            PAYMENT_METHOD 
+        ON 
+            ORDER_.PaymentMethodId = PAYMENT_METHOD.Id
+        LEFT JOIN 
+            MACHINE AS MACHINE_FROM
+        ON 
+            ORDER_.MachineIdFrom = MACHINE_FROM.Id
+        LEFT JOIN 
+            MACHINE AS MACHINE_TO
+        ON 
+            ORDER_.MachineIdTo = MACHINE_TO.Id
+        WHERE 
+            ORDER_.SenderId = ? OR ORDER_.ReceiverId = ?
+    """, (user_id, user_id))
+
+    orders = cursor.fetchall()
+
+    conn.close()
+
+    if not orders:
+        return JsonResponse({'error': 'User with the specified ID not found'}, status=404)
+
+    orders_list = []
+    for order in orders:
+        order_dict = {
+            'Id': order[0],
+            'StatusName': order[1],
+            'SenderMail': order[2],
+            'ReceiverMail': order[3],
+            'ChamberId': order[4],
+            'PaymentMethodName': order[5],
+            'Description': order[6],
+            'Active': bool(order[7]),
+            'StartDate': order[8],
+            'EndDate': order[9],
+            'MachineCodeFrom': order[10],
+            'MachineCodeTo': order[11],
+            'DeliveryDate': order[12],
+            'ReturnDeliveryDate': order[13],
+            'Postponed': bool(order[14]),
+            'PostponedDays': order[15],
+            'IsReturn': bool(order[16]),
+            'DeliveryCost': order[17]
+        }
+        orders_list.append(order_dict)
+
+    return JsonResponse(orders_list, safe=False)
+
+

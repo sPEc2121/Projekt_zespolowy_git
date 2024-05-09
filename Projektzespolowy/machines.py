@@ -33,57 +33,60 @@ def get_all_machines(request):
     return JsonResponse(machines_list, safe=False)
 
 @login_required
-def get_all_available_machines(request):
+def get_available_machines_by_size(request, size):
     conn = sqlite3.connect('msbox_database.db')
     cursor = conn.cursor()
 
+    current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    three_days_ago = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d %H:%M:%S")
+
     cursor.execute("""
-    SELECT 
+    SELECT DISTINCT
             MACHINE.Id AS MachineId,
             MACHINE.Address,
             MACHINE.PostalCode,
             MACHINE.Location,
-            MACHINE.Country,
-            MACHINE.IsMobile,
-            CHAMBER.Size AS ChamberSize
+            MACHINE.Latitude,
+            MACHINE.Longitude              
         FROM 
             MACHINE 
         LEFT JOIN 
             CHAMBER 
         ON 
-            MACHINE.Id = CHAMBER.MachineId AND CHAMBER.Status = 0
+            MACHINE.Id = CHAMBER.MachineId
         WHERE 
-            EXISTS (
-                SELECT 
-                    1 
+            CHAMBER.Status = 0 AND
+            CHAMBER.Size = ? AND
+            NOT EXISTS (
+                SELECT 1 
                 FROM 
-                    CHAMBER AS C 
+                    ORDER_CHAMBER 
+                JOIN 
+                    ORDER_ 
+                ON 
+                    ORDER_CHAMBER.OrderId = ORDER_.Id 
                 WHERE 
-                    C.MachineId = MACHINE.Id AND 
-                    C.Status = 0
+                    ORDER_CHAMBER.ChamberId = CHAMBER.Id AND 
+                    ORDER_.StartDate BETWEEN ? AND ?
             )
-    """)
+    """, (size, three_days_ago, current_date))
 
     machines = cursor.fetchall()
 
     conn.close()
 
-    machines_list = {}
+    if not machines:
+        return JsonResponse({'error': f'No machines available for size {size}'}, status=404)
+
+    machines_list = []
     for machine in machines:
-        machine_id = machine[0]
-        if machine_id not in machines_list:
-            machines_list[machine_id] = {
-                'Id': machine_id,
-                'Address': machine[1],
-                'PostalCode': machine[2],
-                'Location': machine[3],
-                'Country': machine[4],
-                'IsMobile': bool(machine[5]),
-                'AvailableSizes': set()
-            }
-        machines_list[machine_id]['AvailableSizes'].add(machine[6])
+        machines_list.append({
+            'Id': machine[0],
+            'Address': machine[1],
+            'PostalCode': machine[2],
+            'Location': machine[3],
+            'Latitude': machine[4],
+            'Longitude': machine[5]
+        })
 
-    for machine_id in machines_list:
-        machines_list[machine_id]['AvailableSizes'] = list(machines_list[machine_id]['AvailableSizes'])
-
-    return JsonResponse(list(machines_list.values()), safe=False)
+    return JsonResponse(machines_list, safe=False)
