@@ -25,6 +25,7 @@ urlpatterns = [
     path('edit-user/<int:user_id>/', user.edit_user, name='edit_user'),
     path('get-all-orders/', orders.get_all_orders, name='get_all_orders'),
     path('create-order/', orders.create_order, name='create_order'),
+    path('get-user-orders/<int:user_id>/', orders.get_user_orders, name='get_user_orders'),
     path('get-available-machines-by-size/<str:size>/', machines.get_available_machines_by_size, name='get_available_machines_by_size'),
     path('get-all-payment-methods/', payment.get_all_payment_methods, name='get_all_payment_methods'),
     path('get-all-machines/', machines.get_all_machines, name='get_all_machines'),
