@@ -11,7 +11,7 @@ def get_all_machines(request):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT Id, Address, PostalCode, Location, Country, IsMobile FROM MACHINE
+        SELECT Id, Address, PostalCode, Location, Country, IsMobile, Latitude, Longitude FROM MACHINE
     """)
 
     machines = cursor.fetchall()
@@ -26,7 +26,9 @@ def get_all_machines(request):
             'PostalCode': machine[2],
             'Location': machine[3],
             'Country': machine[4],
-            'IsMobile': bool(machine[5])
+            'IsMobile': bool(machine[5]),
+            'Latitude': machine[6],
+            'Longitude':machine[7]
         }
         machines_list.append(machine_dict)
 
