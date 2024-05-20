@@ -6,13 +6,29 @@ from datetime import datetime, timedelta
 from middlewares import login_required
 
 @login_required
-def get_all_machines(request):
+def get_all_machines(request, user_id):
     conn = sqlite3.connect('msbox_database.db')
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT Id, Address, PostalCode, Location, Country, IsMobile, Latitude, Longitude FROM MACHINE
-    """)
+        SELECT 
+            MACHINE.Id, 
+            MACHINE.Address, 
+            MACHINE.PostalCode, 
+            MACHINE.Location, 
+            MACHINE.Country, 
+            MACHINE.IsMobile, 
+            MACHINE.Latitude, 
+            MACHINE.Longitude,
+            CASE 
+                WHEN FAVOURITE_MACHINES.MachineId IS NOT NULL THEN 1 
+                ELSE 0 
+            END AS IsFav
+        FROM 
+            MACHINE
+        LEFT JOIN 
+            FAVOURITE_MACHINES ON MACHINE.Id = FAVOURITE_MACHINES.MachineId AND FAVOURITE_MACHINES.UserId = ?
+    """, (user_id))
 
     machines = cursor.fetchall()
 
@@ -28,14 +44,15 @@ def get_all_machines(request):
             'Country': machine[4],
             'IsMobile': bool(machine[5]),
             'Latitude': machine[6],
-            'Longitude':machine[7]
+            'Longitude': machine[7],
+            'IsFav': bool(machine[8])
         }
         machines_list.append(machine_dict)
 
     return JsonResponse(machines_list, safe=False)
 
 @login_required
-def get_available_machines_by_size(request, size):
+def get_available_machines_by_size(request, size, user_id):
     conn = sqlite3.connect('msbox_database.db')
     cursor = conn.cursor()
 
@@ -49,13 +66,19 @@ def get_available_machines_by_size(request, size):
             MACHINE.PostalCode,
             MACHINE.Location,
             MACHINE.Latitude,
-            MACHINE.Longitude              
+            MACHINE.Longitude,
+            CASE 
+                WHEN FAVOURITE_MACHINES.MachineId IS NOT NULL THEN 1 
+                ELSE 0 
+            END AS IsFav         
         FROM 
             MACHINE 
         LEFT JOIN 
             CHAMBER 
         ON 
             MACHINE.Id = CHAMBER.MachineId
+        LEFT JOIN 
+            FAVOURITE_MACHINES ON MACHINE.Id = FAVOURITE_MACHINES.MachineId AND FAVOURITE_MACHINES.UserId = ?
         WHERE 
             CHAMBER.Status = 0 AND
             CHAMBER.Size = ? AND
@@ -71,7 +94,7 @@ def get_available_machines_by_size(request, size):
                     ORDER_CHAMBER.ChamberId = CHAMBER.Id AND 
                     ORDER_.StartDate BETWEEN ? AND ?
             )
-    """, (size, three_days_ago, current_date))
+    """, (user_id, size, three_days_ago, current_date))
 
     machines = cursor.fetchall()
 
@@ -88,7 +111,8 @@ def get_available_machines_by_size(request, size):
             'PostalCode': machine[2],
             'Location': machine[3],
             'Latitude': machine[4],
-            'Longitude': machine[5]
+            'Longitude': machine[5],
+            'IsFav': bool(machine[6])
         })
 
     return JsonResponse(machines_list, safe=False)
