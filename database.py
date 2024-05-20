@@ -57,6 +57,13 @@ CREATE TABLE IF NOT EXISTS PERSONAL_DATA (
 );
 '''
 
+create_table_machine_type = '''
+CREATE TABLE IF NOT EXISTS MACHINE_TYPE (
+  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  TypeName varchar(20) NOT NULL
+);
+'''
+
 create_table_machine = '''
 CREATE TABLE IF NOT EXISTS MACHINE (
   Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,9 +71,10 @@ CREATE TABLE IF NOT EXISTS MACHINE (
   PostalCode VARCHAR(30) NOT NULL,
   Location VARCHAR(30) NOT NULL,
   Country VARCHAR(30) NOT NULL,
-  IsMobile BOOLEAN NOT NULL,
+  IdMachineType INTEGER NOT NULL,
   Latitude DECIMAL(4,20) NOT NULL,
-  Longitude DECIMAL(4,20) NOT NULL
+  Longitude DECIMAL(4,20) NOT NULL,
+  FOREIGN KEY (IdMachineType) REFERENCES MACHINE_TYPE(Id)
 );
 '''
 
@@ -175,6 +183,7 @@ CREATE TABLE IF NOT EXISTS ORDER_CHAMBER (
 # Executing table create commands
 cursor.execute(create_table_user)
 cursor.execute(create_table_personal_data)
+cursor.execute(create_table_machine_type)
 cursor.execute(create_table_machine)
 cursor.execute(create_table_chamber)
 cursor.execute(create_table_chamber_details)
@@ -299,8 +308,16 @@ VALUES
 (50, 'Teresa', 'Makowska', '1988-02-13', 1, 'Sienkiewicza 10', '15-001', 'Białystok', '48550123456', 'Poland', 53.1327256, 23.15447829116575)
 '''
 
+insert_machine_type = '''
+INSERT INTO MACHINE_TYPE (TypeName)
+VALUES
+('Automat'),
+('Automat mobilny'),
+('Pion')
+'''
+
 insert_machine = '''
-INSERT INTO MACHINE (Address, PostalCode, Location, Country, IsMobile, Latitude, Longitude)
+INSERT INTO MACHINE (Address, PostalCode, Location, Country, IdMachineType, Latitude, Longitude)
 VALUES
 ('Kopernika 17', '90-001', 'Łódź', 'Poland', 0, 51.7626561, 19.44890699288188),
 ('Długa 20', '80-827', 'Gdańsk', 'Poland', 0, 54.34911485, 18.650020219933126),
@@ -1796,12 +1813,18 @@ VALUES
 insert_status = '''
 INSERT INTO STATUS (StatusName)
 VALUES
-('Paczka odebrana przez kuriera z paczkomatu.'),
-('Paczka dostarczona do sortowni.'),
+('Paczka czeka na umieszczenie w automacie nadawczym.'),
+('Paczka została umieszczona w automacie nadawczym.'),
 ('Paczka odebrana przez kuriera.'),
+('Paczka dotarła do sortowni.'),
+('Paczka wyjechała z sortowni.'),
 ('Paczka gotowa do odbioru.'),
-('Rozpoczęcie zwrotu paczki.'),
-('Paczka zwrotna gotowa do odbioru.')
+('Paczka odebrana z automatu.'),
+('Paczka nie została odebrana na czas, rozpoczęcie zwrotu do adresata.'),
+('Paczka zwrotna odebrana przez kuriera.'),
+('Paczka zwrotna gotowa do odbioru.'),
+('Paczka zwrotna odebrana przez nadawcę.')
+
 '''
 
 insert_order = '''
@@ -1959,6 +1982,7 @@ VALUES
 truncate_user = 'DELETE FROM USER'
 truncate_personal_data = 'DELETE FROM PERSONAL_DATA'
 truncate_machine = 'DELETE FROM MACHINE'
+truncate_machine_type = 'DELETE FROM MACHINE_TYPE'
 truncate_chamber = 'DELETE FROM CHAMBER'
 truncate_chamber_details = 'DELETE FROM CHAMBER_DETAILS'
 truncate_payment_method = 'DELETE FROM PAYMENT_METHOD'
@@ -1971,6 +1995,7 @@ truncate_order_chamber = 'DELETE FROM ORDER_CHAMBER'
 
 cursor.execute(truncate_user)
 cursor.execute(truncate_personal_data)
+cursor.execute(truncate_machine_type)
 cursor.execute(truncate_machine)
 cursor.execute(truncate_chamber)
 cursor.execute(truncate_chamber_details)
@@ -1982,8 +2007,10 @@ cursor.execute(truncate_role)
 cursor.execute(truncate_user_role)
 
 
+
 cursor.execute(insert_user)
 cursor.execute(insert_personal_data)
+cursor.execute(insert_machine_type)
 cursor.execute(insert_machine)
 cursor.execute(insert_chamber)
 cursor.execute(insert_chamber_details)

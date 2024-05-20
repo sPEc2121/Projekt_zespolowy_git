@@ -16,22 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from . import views, user, authorize, orders, payment, machines
+from . import views, user, authorize, orders, payment, machines, admin
 
 urlpatterns = [
     path('get-all-users/', user.get_all_users, name='get_all_users'),
     path('disable-user/', user.disable_user, name='disable-user'),
+    path('enable-user/', user.enable_user, name='enable_user'),
     path('get-user-by-id/<int:user_id>/', user.get_user_by_id, name='get_user_by_id'),
     path('edit-user/<int:user_id>/', user.edit_user, name='edit_user'),
     path('get-all-orders/', orders.get_all_orders, name='get_all_orders'),
     path('create-order/', orders.create_order, name='create_order'),
     path('get-user-orders/<int:user_id>/', orders.get_user_orders, name='get_user_orders'),
-    path('get-available-machines-by-size/<str:size>/<int:user_id>/', machines.get_available_machines_by_size, name='get_available_machines_by_size'),
+    path('change-order-status/<int:order_id>/<int:status_id>/', orders.change_order_status, name='change_order_status'),
     path('get-all-payment-methods/', payment.get_all_payment_methods, name='get_all_payment_methods'),
     path('get-size-prices/', payment.get_size_prices, name='get_size_prices'),
     path('get-all-machines/<int:user_id>/', machines.get_all_machines, name='get_all_machines'),
-    path('get-available-machines-by-size/', machines.get_available_machines_by_size, name='get_available_machines_by_size'),
+    path('get-available-machines-by-size/<str:size>/<int:user_id>/', machines.get_available_machines_by_size, name='get_available_machines_by_size'),
+    path('add-favourite-machine/<int:user_id>/<int:machine_id>/', machines.add_favourite_machine, name='add_favourite_machine'),
+    path('remove-favourite-machine/<int:user_id>/<int:machine_id>/', machines.remove_favourite_machine, name='remove_favourite_machine'),
     path('login/', authorize.login, name='login'),
     path('register/', authorize.register, name='register'),
+    path('get-all-statuses/', admin.get_all_statuses, name='get_all_statuses'),
     # path('admin/', admin.site.urls),
 ]
