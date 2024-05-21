@@ -94,8 +94,8 @@ def create_order(request):
             # Otrzymujemy dane z ciała żądania jako słownik
             order_data = json.loads(request.body)
             # Pobieramy wartości ze słownika
-            sender_id = order_data.get('SenderId')
-            receiver_id = order_data.get('ReceiverId')
+            sender_mail = order_data.get('SenderMail')
+            receiver_mail = order_data.get('ReceiverMail')
             payment_method_id = order_data.get('PaymentMethodId')
             description = order_data.get('Description')
             machine_id_from = order_data.get('MachineIdFrom')
@@ -114,6 +114,30 @@ def create_order(request):
 
             # Rozpocznij transakcję
             conn.execute("BEGIN")
+
+            # Znajdź identyfikator sendera na podstawie maila
+            cursor.execute("""
+                SELECT Id FROM USER WHERE Mail = ?
+            """, (sender_mail,))
+            sender_id = cursor.fetchone()
+            if sender_id is None:
+                # Jeśli nie znaleziono sendera, zakończ transakcję i zwróć błąd
+                conn.rollback()
+                conn.close()
+                return JsonResponse({'error': 'Sender not found'}, status=404)
+            sender_id = sender_id[0]
+
+            # Znajdź identyfikator receivera na podstawie maila
+            cursor.execute("""
+                SELECT Id FROM USER WHERE Mail = ?
+            """, (receiver_mail,))
+            receiver_id = cursor.fetchone()
+            if receiver_id is None:
+                # Jeśli nie znaleziono receivera, zakończ transakcję i zwróć błąd
+                conn.rollback()
+                conn.close()
+                return JsonResponse({'error': 'Receiver not found'}, status=404)
+            receiver_id = receiver_id[0]
 
             # Znajdź pierwszą wolną komorę o wybranym rozmiarze dla podanej maszyny
             cursor.execute("""
@@ -216,7 +240,6 @@ def create_order(request):
         return JsonResponse({'error': 'Invalid request method'}, status=405)
 
     
-
 @login_required
 def get_user_orders(request, user_id):
     conn = sqlite3.connect('msbox_database.db')
@@ -308,5 +331,45 @@ def get_user_orders(request, user_id):
         orders_list.append(order_dict)
 
     return JsonResponse(orders_list, safe=False)
+
+
+@login_required
+def change_order_status(request, order_id, status_id):
+    if request.method == 'POST':
+        try:
+            # Połącz się z bazą danych
+            conn = sqlite3.connect('msbox_database.db')
+            cursor = conn.cursor()
+
+            # Sprawdź, czy istnieje zamówienie o podanym id
+            cursor.execute("""
+                SELECT Id FROM ORDER_ WHERE Id = ?
+            """, (order_id,))
+            order_exists = cursor.fetchone()
+
+            if order_exists is None:
+                # Zamówienie o podanym id nie istnieje - zwróć błąd
+                conn.close()
+                return JsonResponse({'error': 'Order not found'}, status=404)
+
+            # Zaktualizuj status zamówienia
+            cursor.execute("""
+                UPDATE ORDER_ SET StatusId = ? WHERE Id = ?
+            """, (status_id, order_id))
+
+            # Zatwierdź zmiany w bazie danych
+            conn.commit()
+            conn.close()
+
+            return JsonResponse({'message': 'Order status updated successfully'})
+
+        except Exception as e:
+            # Wystąpił błąd - wykonaj rollback
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 

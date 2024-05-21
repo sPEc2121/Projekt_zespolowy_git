@@ -62,7 +62,7 @@ SelectedChambers AS (
     UNION ALL
     SELECT Id FROM CTE_L
 )
-SELECT c.Size, cs.Price + 600 AS Price
+SELECT c.Size, cs.Price + 500 AS Price
 FROM CHAMBER_DETAILS cs
 INNER JOIN CHAMBER c ON cs.ChamberId = c.Id
 WHERE cs.ChamberId IN (SELECT Id FROM SelectedChambers)

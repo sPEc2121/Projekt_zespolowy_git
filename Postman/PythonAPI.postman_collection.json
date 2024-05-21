@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "6dd7195e-911b-4116-84e2-337b2d639d60",
+		"_postman_id": "08f5b1c9-8b03-4012-a9da-3e5f78543b8f",
 		"name": "PythonAPI",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "34483196"
@@ -81,9 +81,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "1be5b432-f69e-486a-80f2-c329c489fc3b"
+								"value": "{{token}}"
 							}
 						],
 						"body": {
@@ -152,9 +150,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "3a7b8b7e-6bda-421f-928a-aa310d1a1736"
+								"value": "{{token}}"
 							}
 						],
 						"body": {
@@ -185,6 +181,43 @@
 					"response": []
 				},
 				{
+					"name": "Enable user",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"Id\": 51}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/enable-user/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"enable-user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get user info",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -194,9 +227,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "ef07ad76-fe55-4bf0-a15c-1c6e9681243d"
+								"value": "{{token}}"
 							}
 						],
 						"body": {
@@ -234,9 +265,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "9151c165-f68d-4278-9ba1-726aa0831132"
+								"value": "{{token}}"
 							}
 						],
 						"body": {
@@ -279,9 +308,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "5fa32c86-34f0-4bdb-8bf7-e16758fc41fa"
+								"value": "{{token}}"
 							}
 						],
 						"url": {
@@ -309,9 +336,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "5fa32c86-34f0-4bdb-8bf7-e16758fc41fa"
+								"value": "{{token}}"
 							}
 						],
 						"url": {
@@ -340,14 +365,12 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "01b1af39-d7e2-4f76-a05f-6cdd2a1691ba"
+								"value": "{{token}}"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"SenderId\": 1,\r\n    \"ReceiverId\": 2,\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 1,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
+							"raw": "{\r\n    \"SenderMail\": \"krzysztof.duda@example.com\",\r\n    \"ReceiverMail\": \"ireneusz.sikorski@example.com\",\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 1,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -371,6 +394,45 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Change order status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"SenderMail\": \"krzysztof.duda@example.com\",\r\n    \"ReceiverMail\": \"ireneusz.sikorski@example.com\",\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 1,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/change-order-status/1/7/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"change-order-status",
+								"1",
+								"7",
+								""
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -384,9 +446,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "2539b421-4d00-4ec2-930b-5e5dd65db434"
+								"value": "{{token}}"
 							}
 						],
 						"url": {
@@ -406,6 +466,34 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Get size prices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/get-size-prices/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"get-size-prices",
+								""
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -419,13 +507,11 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "99c1909b-1014-4ff9-834d-351369dfe990"
+								"value": "{{token}}"
 							}
 						],
 						"url": {
-							"raw": "http://127.0.0.1:8000/get-all-machines/",
+							"raw": "http://127.0.0.1:8000/get-all-machines/1/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -436,6 +522,67 @@
 							"port": "8000",
 							"path": [
 								"get-all-machines",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add fav machine",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/add-favourite-machine/1/20/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"add-favourite-machine",
+								"1",
+								"20",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove fav machine",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/remove-favourite-machine/1/20/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"remove-favourite-machine",
+								"1",
+								"20",
 								""
 							]
 						}
@@ -452,9 +599,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "{{token}}",
-								"type": "text",
-								"uuid": "4b69d7cb-63ee-4d81-a933-996fff36bc16"
+								"value": "{{token}}"
 							}
 						],
 						"body": {
@@ -467,7 +612,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/get-available-machines-by-size/S/",
+							"raw": "http://127.0.0.1:8000/get-available-machines-by-size/S/1/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -479,6 +624,77 @@
 							"path": [
 								"get-available-machines-by-size",
 								"S",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Get all statuses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/get-all-statuses/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"get-all-statuses",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update order",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"Id\": 1,\r\n        \"StatusName\": \"Paczka czeka na umieszczenie w automacie nadawczym.\",\r\n        \"SenderMail\": \"krzysztof.duda@example.com\",\r\n        \"ReceiverMail\": \"fabian.gajewski@example.com\",\r\n        \"PaymentMethodName\": \"Karta płatnicza\",\r\n        \"Description\": \"Ubrania\",\r\n        \"Active\": false,\r\n        \"StartDate\": \"2023-01-01 09:25:43\",\r\n        \"EndDate\": \"2023-01-06 13:55:43\",\r\n        \"MachineIdFrom\": 1,\r\n        \"MachineIdTo\": 26,\r\n        \"ChamberId\": 1,\r\n        \"DeliveryDate\": \"2023-01-04 13:55:43\",\r\n        \"ReturnDeliveryDate\": null,\r\n        \"Postponed\": false,\r\n        \"PostponedDays\": null,\r\n        \"IsReturn\": false,\r\n        \"DeliveryCost\": 1200\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/update-order/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"update-order",
 								""
 							]
 						}

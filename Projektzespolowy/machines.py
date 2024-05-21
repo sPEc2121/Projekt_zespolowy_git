@@ -17,7 +17,7 @@ def get_all_machines(request, user_id):
             MACHINE.PostalCode, 
             MACHINE.Location, 
             MACHINE.Country, 
-            MACHINE.IsMobile, 
+            MACHINE.IdMachineType, 
             MACHINE.Latitude, 
             MACHINE.Longitude,
             CASE 
@@ -28,7 +28,7 @@ def get_all_machines(request, user_id):
             MACHINE
         LEFT JOIN 
             FAVOURITE_MACHINES ON MACHINE.Id = FAVOURITE_MACHINES.MachineId AND FAVOURITE_MACHINES.UserId = ?
-    """, (user_id))
+    """, (user_id,))
 
     machines = cursor.fetchall()
 
@@ -42,7 +42,7 @@ def get_all_machines(request, user_id):
             'PostalCode': machine[2],
             'Location': machine[3],
             'Country': machine[4],
-            'IsMobile': bool(machine[5]),
+            'IdMachineType': bool(machine[5]),
             'Latitude': machine[6],
             'Longitude': machine[7],
             'IsFav': bool(machine[8])
@@ -116,3 +116,71 @@ def get_available_machines_by_size(request, size, user_id):
         })
 
     return JsonResponse(machines_list, safe=False)
+
+@login_required
+def add_favourite_machine(request, user_id, machine_id):
+    if request.method == 'POST':
+        conn = sqlite3.connect('msbox_database.db')
+        cursor = conn.cursor()
+
+        try:
+            cursor.execute("""
+            SELECT COUNT(*) FROM FAVOURITE_MACHINES WHERE UserId = ? AND MachineId = ?
+            """, (user_id, machine_id))
+            if cursor.fetchone()[0] > 0:
+                conn.close()
+                return JsonResponse({'error': 'Machine already added to favourites'}, status=400)
+
+            cursor.execute("""
+            INSERT INTO FAVOURITE_MACHINES (UserId, MachineId)
+            VALUES (?, ?)
+            """, (user_id, machine_id))
+
+            conn.commit()
+
+            conn.close()
+
+            return JsonResponse({'success': True, 'message': 'Machine added to favourites'}, status=201)
+        except Exception as e:
+            conn.rollback()
+
+            conn.close()
+
+            return JsonResponse({'success': False, 'message': f'Error adding machine to favourites: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Unsupported method'}, status=405)
+
+@login_required
+def remove_favourite_machine(request, user_id, machine_id):
+    if request.method == 'POST':
+        conn = sqlite3.connect('msbox_database.db')
+        cursor = conn.cursor()
+
+        try:
+
+            cursor.execute("""
+            SELECT COUNT(*) FROM FAVOURITE_MACHINES WHERE UserId = ? AND MachineId = ?
+            """, (user_id, machine_id))
+            if cursor.fetchone()[0] == 0:
+                conn.close()
+                return JsonResponse({'error': 'Machine not found in favourites'}, status=404)
+
+            cursor.execute("""
+            DELETE FROM FAVOURITE_MACHINES WHERE UserId = ? AND MachineId = ?
+            """, (user_id, machine_id))
+
+            conn.commit()
+
+            conn.close()
+
+            return JsonResponse({'success': True, 'message': 'Machine removed from favourites'}, status=200)
+        except Exception as e:
+
+            conn.rollback()
+
+            conn.close()
+
+            return JsonResponse({'success': False, 'message': f'Error removing machine from favourites: {str(e)}'}, status=500)
+
+    return JsonResponse({'error': 'Unsupported method'}, status=405)
+
