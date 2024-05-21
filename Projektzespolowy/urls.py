@@ -37,5 +37,6 @@ urlpatterns = [
     path('login/', authorize.login, name='login'),
     path('register/', authorize.register, name='register'),
     path('get-all-statuses/', admin.get_all_statuses, name='get_all_statuses'),
+    path('update-order/', admin.update_order, name='update_order')
     # path('admin/', admin.site.urls),
 ]
