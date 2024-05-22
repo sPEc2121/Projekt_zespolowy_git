@@ -330,6 +330,34 @@
 					"response": []
 				},
 				{
+					"name": "Open chamber for order",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "http://127.0.0.1:8000/get-all-orders/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"get-all-orders",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get all orders for User",
 					"request": {
 						"method": "GET",
@@ -407,7 +435,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"SenderMail\": \"krzysztof.duda@example.com\",\r\n    \"ReceiverMail\": \"ireneusz.sikorski@example.com\",\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 1,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -415,7 +443,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/change-order-status/1/7/",
+							"raw": "http://127.0.0.1:8000/change-order-status/26/5/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -426,8 +454,8 @@
 							"port": "8000",
 							"path": [
 								"change-order-status",
-								"1",
-								"7",
+								"26",
+								"5",
 								""
 							]
 						}
