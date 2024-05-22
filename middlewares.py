@@ -4,7 +4,7 @@ from django.http import JsonResponse
 def jwt_auth_middleware(get_response):
     def middleware(request):
         # Sprawdź, czy to jest widok logowania
-        if request.path == '/login/' or request.path == '/register/':
+        if request.path == '/login/' or request.path == '/register/' or '/update-order-status-by-chamber/<int:chamber_id>/':
             # Jeśli to jest widok logowania, po prostu wykonaj widok bez autoryzacji
             return get_response(request)
 

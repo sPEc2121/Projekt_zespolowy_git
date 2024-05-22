@@ -164,7 +164,6 @@ def create_order(request):
 
         # Znajdź wolną komorę dla machine_id_from
         chamber_id_from, valid_machine_id_from = find_available_chamber(machine_id_from, size)
-        print(chamber_id_from)
         if chamber_id_from is None:
             conn.rollback()
             conn.close()
@@ -352,19 +351,84 @@ def change_order_status(request, order_id, status_id):
 
             # Sprawdź, czy istnieje zamówienie o podanym id
             cursor.execute("""
-                SELECT Id FROM ORDER_ WHERE Id = ?
+                SELECT Id, StatusId FROM ORDER_ WHERE Id = ?
             """, (order_id,))
-            order_exists = cursor.fetchone()
-
-            if order_exists is None:
+            order = cursor.fetchone()
+            print(order)
+            if order is None:
                 # Zamówienie o podanym id nie istnieje - zwróć błąd
                 conn.close()
                 return JsonResponse({'error': 'Order not found'}, status=404)
+
+            current_status_id = order[1]
 
             # Zaktualizuj status zamówienia
             cursor.execute("""
                 UPDATE ORDER_ SET StatusId = ? WHERE Id = ?
             """, (status_id, order_id))
+
+            # Jeśli nowy status to 5, zaktualizuj ChamberId i usuń rekord z ORDER_CHAMBER
+            if status_id == 5:
+                cursor.execute("""
+                    SELECT ChamberId FROM ORDER_CHAMBER WHERE OrderId = ?
+                """, (order_id,))
+                order_chamber = cursor.fetchone()
+
+                if order_chamber is not None:
+                    new_chamber_id = order_chamber[0]
+
+                    # Zaktualizuj ChamberId w zamówieniu
+                    cursor.execute("""
+                        UPDATE ORDER_ SET ChamberId = ? WHERE Id = ?
+                    """, (new_chamber_id, order_id))
+
+                    # Usuń rekord z ORDER_CHAMBER
+                    cursor.execute("""
+                        DELETE FROM ORDER_CHAMBER WHERE OrderId = ? AND ChamberId = ?
+                    """, (order_id, new_chamber_id))
+
+            # Zatwierdź zmiany w bazie danych
+            conn.commit()
+            conn.close()
+
+            return JsonResponse({'message': 'Order status updated successfully'})
+
+        except Exception as e:
+            # Wystąpił błąd - wykonaj rollback
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+  
+
+def update_order_status_by_chamber(request, chamber_id):
+    if request.method == 'POST':
+        try:
+            # Połącz się z bazą danych
+            conn = sqlite3.connect('msbox_database.db')
+            cursor = conn.cursor()
+
+            # Sprawdź, czy istnieje aktywne zamówienie dla podanej komory z odpowiednim statusem
+            cursor.execute("""
+                SELECT Id, StatusId FROM ORDER_ 
+                WHERE ChamberId = ? AND Active = 1 AND StatusId IN (1, 2, 5, 6, 8, 9, 10)
+            """, (chamber_id,))
+            order = cursor.fetchone()
+
+            if order is None:
+                # Nie znaleziono zamówienia spełniającego kryteria - zwróć błąd
+                conn.close()
+                return JsonResponse({'error': 'No active order found with the specified status for this chamber'}, status=404)
+
+            order_id, current_status_id = order
+
+            # Zaktualizuj status zamówienia na numer o 1 większy
+            new_status_id = current_status_id + 1
+            cursor.execute("""
+                UPDATE ORDER_ SET StatusId = ? WHERE Id = ?
+            """, (new_status_id, order_id))
 
             # Zatwierdź zmiany w bazie danych
             conn.commit()

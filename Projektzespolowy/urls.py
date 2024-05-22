@@ -28,6 +28,7 @@ urlpatterns = [
     path('create-order/', orders.create_order, name='create_order'),
     path('get-user-orders/<int:user_id>/', orders.get_user_orders, name='get_user_orders'),
     path('change-order-status/<int:order_id>/<int:status_id>/', orders.change_order_status, name='change_order_status'),
+    path('update-order-status-by-chamber/<int:chamber_id>/', orders.update_order_status_by_chamber, name='update_order_status_by_chamber'),    
     path('get-all-payment-methods/', payment.get_all_payment_methods, name='get_all_payment_methods'),
     path('get-size-prices/', payment.get_size_prices, name='get_size_prices'),
     path('get-all-machines/<int:user_id>/', machines.get_all_machines, name='get_all_machines'),
