@@ -86,160 +86,169 @@ def get_all_orders(request):
 
     return JsonResponse(orders_list, safe=False)
 
-
 @login_required
 def create_order(request):
-    if request.method == 'POST':
-        try:
-            # Otrzymujemy dane z ciała żądania jako słownik
-            order_data = json.loads(request.body)
-            # Pobieramy wartości ze słownika
-            sender_mail = order_data.get('SenderMail')
-            receiver_mail = order_data.get('ReceiverMail')
-            payment_method_id = order_data.get('PaymentMethodId')
-            description = order_data.get('Description')
-            machine_id_from = order_data.get('MachineIdFrom')
-            machine_id_to = order_data.get('MachineIdTo')
-            size = order_data.get('Size')
+    try:
+        # Otrzymujemy dane z ciała żądania jako słownik
+        order_data = json.loads(request.body)
+        # Pobieramy wartości ze słownika
+        sender_mail = order_data.get('SenderMail')
+        receiver_mail = order_data.get('ReceiverMail')
+        payment_method_id = order_data.get('PaymentMethodId')
+        description = order_data.get('Description')
+        machine_id_from = order_data.get('MachineIdFrom')
+        machine_id_to = order_data.get('MachineIdTo')
+        size = order_data.get('Size')
 
-            # Ustawiamy domyślne wartości
-            status_id = 1  # Domyślnie ustawiamy na 1
-            active = 1     # Domyślnie ustawiamy na 1
-            start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Bieżąca data i czas
-            is_return = 0
+        # Ustawiamy domyślne wartości
+        status_id = 1  # Domyślnie ustawiamy na 1
+        active = 1     # Domyślnie ustawiamy na 1
+        start_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Bieżąca data i czas
+        is_return = 0
 
-            # Połącz się z bazą danych
-            conn = sqlite3.connect('msbox_database.db')
-            cursor = conn.cursor()
+        # Połącz się z bazą danych
+        conn = sqlite3.connect('msbox_database.db')
+        cursor = conn.cursor()
 
-            # Rozpocznij transakcję
-            conn.execute("BEGIN")
+        # Rozpocznij transakcję
+        conn.execute("BEGIN")
 
-            # Znajdź identyfikator sendera na podstawie maila
-            cursor.execute("""
-                SELECT Id FROM USER WHERE Mail = ?
-            """, (sender_mail,))
-            sender_id = cursor.fetchone()
-            if sender_id is None:
-                # Jeśli nie znaleziono sendera, zakończ transakcję i zwróć błąd
-                conn.rollback()
-                conn.close()
-                return JsonResponse({'error': 'Sender not found'}, status=404)
-            sender_id = sender_id[0]
-
-            # Znajdź identyfikator receivera na podstawie maila
-            cursor.execute("""
-                SELECT Id FROM USER WHERE Mail = ?
-            """, (receiver_mail,))
-            receiver_id = cursor.fetchone()
-            if receiver_id is None:
-                # Jeśli nie znaleziono receivera, zakończ transakcję i zwróć błąd
-                conn.rollback()
-                conn.close()
-                return JsonResponse({'error': 'Receiver not found'}, status=404)
-            receiver_id = receiver_id[0]
-
-            # Znajdź pierwszą wolną komorę o wybranym rozmiarze dla podanej maszyny
-            cursor.execute("""
-                SELECT 
-                    CHAMBER.Id 
-                FROM 
-                    CHAMBER 
-                WHERE 
-                    CHAMBER.MachineId = ? AND 
-                    CHAMBER.Size = ? AND 
-                    CHAMBER.Status = 0 
-                LIMIT 1
-            """, (machine_id_to, size))
-            chamber = cursor.fetchone()
-
-            if chamber is not None:
-                chamber_id = chamber[0]
-
-                # Wyznacz koszt dostawy na podstawie danych z tabeli CHAMBER_DETAILS
-                cursor.execute("""
-                    SELECT 
-                        Price 
-                    FROM 
-                        CHAMBER_DETAILS 
-                    WHERE 
-                        ChamberId = ? AND 
-                        Active = 1
-                """, (chamber_id,))
-                chamber_details = cursor.fetchone()
-
-                if chamber_details:
-                    delivery_cost = chamber_details[0] + 500  # Dodajemy 500 do ceny z CHAMBER_DETAILS
-                else:
-                    delivery_cost = 0  # Jeśli brak danych, ustawiamy koszt na 0
-
-                # Wstaw nowy rekord do tabeli ORDER_
-                cursor.execute("""
-                    INSERT INTO ORDER_ (
-                        StatusId, 
-                        SenderId, 
-                        ReceiverId, 
-                        ChamberId, 
-                        PaymentMethodId, 
-                        Description, 
-                        Active, 
-                        StartDate, 
-                        MachineIdFrom, 
-                        MachineIdTo,
-                        IsReturn,
-                        DeliveryCost
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    status_id,
-                    sender_id,
-                    receiver_id,
-                    chamber_id,
-                    payment_method_id,
-                    description,
-                    active,
-                    start_date,
-                    machine_id_from,
-                    machine_id_to,
-                    is_return,
-                    delivery_cost
-                ))
-
-                # Pobierz id utworzonego zamówienia
-                order_id = cursor.lastrowid
-
-                # Wstaw rekord do tabeli ORDER_CHAMBER
-                cursor.execute("""
-                    INSERT INTO ORDER_CHAMBER (
-                        OrderId, 
-                        ChamberId
-                    ) VALUES (?, ?)
-                """, (
-                    order_id,
-                    chamber_id
-                ))
-
-                # Zatwierdź transakcję
-                conn.commit()
-                conn.close()
-
-                return JsonResponse({'message': 'Order created successfully'})
-
-            else:
-                # Nie znaleziono dostępnej komory - wykonaj rollback
-                conn.rollback()
-                conn.close()
-                return JsonResponse({'error': 'No available chamber found for the selected machine and size'}, status=400)
-
-        except Exception as e:
-            # Wystąpił błąd - wykonaj rollback
+        # Znajdź identyfikator sendera na podstawie maila
+        cursor.execute("SELECT Id FROM USER WHERE Mail = ?", (sender_mail,))
+        sender_id = cursor.fetchone()
+        if sender_id is None:
             conn.rollback()
             conn.close()
-            return JsonResponse({'error': str(e)}, status=500)
+            return JsonResponse({'error': 'Sender not found'}, status=404)
+        sender_id = sender_id[0]
 
-    else:
-        return JsonResponse({'error': 'Invalid request method'}, status=405)
+        # Znajdź identyfikator receivera na podstawie maila
+        cursor.execute("SELECT Id FROM USER WHERE Mail = ?", (receiver_mail,))
+        receiver_id = cursor.fetchone()
+        if receiver_id is None:
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': 'Receiver not found'}, status=404)
+        receiver_id = receiver_id[0]
 
-    
+        def find_available_chamber(machine_id, size):
+            # Szukaj wolnej komory dla podanej maszyny
+            cursor.execute("""
+                SELECT CHAMBER.Id
+                FROM CHAMBER
+                WHERE CHAMBER.MachineId = ? AND CHAMBER.Size = ? AND CHAMBER.Status = 0
+                LIMIT 1
+            """, (machine_id, size))
+            chamber = cursor.fetchone()
+
+            if chamber is None:
+                # Jeśli nie znaleziono wolnej komory, sprawdź inne maszyny o tym samym adresie
+                cursor.execute("""
+                    SELECT C.Id, M1.Id AS OriginalMachineId
+                    FROM MACHINE M1
+                    JOIN MACHINE M2 ON M1.Address = M2.Address 
+                        AND M1.PostalCode = M2.PostalCode 
+                        AND M1.Location = M2.Location
+                    JOIN CHAMBER C ON M2.Id = C.MachineId
+                    WHERE M1.Id = ? AND C.Size = ? AND C.Status = 0
+                    LIMIT 1
+                """, (machine_id, size))
+                alternate_chamber = cursor.fetchone()
+
+                if alternate_chamber is not None:
+                    return alternate_chamber[0], machine_id  # Zwraca id komory i oryginalne id maszyny
+                else:
+                    return None, None
+            else:
+                return chamber[0], machine_id
+
+        # Znajdź wolną komorę dla machine_id_from
+        chamber_id_from, valid_machine_id_from = find_available_chamber(machine_id_from, size)
+        print(chamber_id_from)
+        if chamber_id_from is None:
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': 'No available chamber found for the selected from machine and size'}, status=400)
+
+        # Znajdź wolną komorę dla machine_id_to
+        chamber_id_to, valid_machine_id_to = find_available_chamber(machine_id_to, size)
+        if chamber_id_to is None:
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': 'No available chamber found for the selected to machine and size'}, status=400)
+
+        # Wyznacz koszt dostawy na podstawie danych z tabeli CHAMBER_DETAILS
+        cursor.execute("SELECT Price FROM CHAMBER_DETAILS WHERE ChamberId = ? AND Active = 1", (chamber_id_to,))
+        chamber_details = cursor.fetchone()
+
+        if chamber_details:
+            delivery_cost = chamber_details[0] + 500  # Dodajemy 500 do ceny z CHAMBER_DETAILS
+        else:
+            delivery_cost = 0  # Jeśli brak danych, ustawiamy koszt na 0
+
+        # Wstaw nowy rekord do tabeli ORDER_
+        cursor.execute("""
+            INSERT INTO ORDER_ (
+                StatusId, 
+                SenderId, 
+                ReceiverId, 
+                ChamberId, 
+                PaymentMethodId, 
+                Description, 
+                Active, 
+                StartDate, 
+                MachineIdFrom, 
+                MachineIdTo,
+                IsReturn,
+                DeliveryCost
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            status_id,
+            sender_id,
+            receiver_id,
+            chamber_id_from,
+            payment_method_id,
+            description,
+            active,
+            start_date,
+            valid_machine_id_from,
+            valid_machine_id_to,
+            is_return,
+            delivery_cost
+        ))
+
+        # Pobierz id utworzonego zamówienia
+        order_id = cursor.lastrowid
+
+        # Wstaw rekord do tabeli ORDER_CHAMBER
+        cursor.execute("""
+            INSERT INTO ORDER_CHAMBER (
+                OrderId, 
+                ChamberId
+            ) VALUES (?, ?)
+        """, (
+            order_id,
+            chamber_id_to
+        ))
+
+        # Zaktualizuj status komory na zajętą
+        cursor.execute("""
+            UPDATE CHAMBER
+            SET Status = 1
+            WHERE Id = ?
+        """, (chamber_id_to,))
+
+        # Zatwierdź transakcję
+        conn.commit()
+        conn.close()
+
+        return JsonResponse({'message': 'Order created successfully'})
+
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        return JsonResponse({'error': str(e)}, status=500)
+
 @login_required
 def get_user_orders(request, user_id):
     conn = sqlite3.connect('msbox_database.db')

@@ -370,7 +370,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"SenderMail\": \"krzysztof.duda@example.com\",\r\n    \"ReceiverMail\": \"ireneusz.sikorski@example.com\",\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 1,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
+							"raw": "{\r\n    \"SenderMail\": \"krzysztof.duda@example.com\",\r\n    \"ReceiverMail\": \"ireneusz.sikorski@example.com\",\r\n    \"PaymentMethodId\": 3,\r\n    \"Description\": \"Skarpetki\",\r\n    \"MachineIdFrom\": 51,\r\n    \"MachineIdTo\": 2,\r\n    \"Size\": \"L\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"

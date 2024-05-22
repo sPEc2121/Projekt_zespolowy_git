@@ -60,41 +60,67 @@ def get_available_machines_by_size(request, size, user_id):
     three_days_ago = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d %H:%M:%S")
 
     cursor.execute("""
-    SELECT DISTINCT
-            MACHINE.Id AS MachineId,
-            MACHINE.Address,
-            MACHINE.PostalCode,
-            MACHINE.Location,
-            MACHINE.Latitude,
-            MACHINE.Longitude,
-            CASE 
-                WHEN FAVOURITE_MACHINES.MachineId IS NOT NULL THEN 1 
-                ELSE 0 
-            END AS IsFav         
-        FROM 
-            MACHINE 
-        LEFT JOIN 
-            CHAMBER 
-        ON 
-            MACHINE.Id = CHAMBER.MachineId
-        LEFT JOIN 
-            FAVOURITE_MACHINES ON MACHINE.Id = FAVOURITE_MACHINES.MachineId AND FAVOURITE_MACHINES.UserId = ?
-        WHERE 
-            CHAMBER.Status = 0 AND
-            CHAMBER.Size = ? AND
-            NOT EXISTS (
-                SELECT 1 
-                FROM 
-                    ORDER_CHAMBER 
-                JOIN 
-                    ORDER_ 
-                ON 
-                    ORDER_CHAMBER.OrderId = ORDER_.Id 
-                WHERE 
-                    ORDER_CHAMBER.ChamberId = CHAMBER.Id AND 
-                    ORDER_.StartDate BETWEEN ? AND ?
-            )
-    """, (user_id, size, three_days_ago, current_date))
+    WITH AvailableMachines AS (
+    SELECT 
+        MACHINE.Id AS MachineId,
+        MACHINE.Address,
+        MACHINE.PostalCode,
+        MACHINE.Location,
+        MACHINE.Latitude,
+        MACHINE.Longitude,
+        CASE 
+            WHEN FAVOURITE_MACHINES.MachineId IS NOT NULL THEN 1 
+            ELSE 0 
+        END AS IsFav,
+        MACHINE.IdMachineType,
+        EXISTS (
+            SELECT 1
+            FROM CHAMBER C
+            WHERE 
+                C.MachineId = MACHINE.Id
+                AND C.Status = 0
+                AND C.Size = ?
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM ORDER_CHAMBER OC
+                    JOIN ORDER_ O ON OC.OrderId = O.Id
+                    WHERE 
+                        OC.ChamberId = C.Id
+                        AND O.StartDate BETWEEN ? AND ?
+                )
+        ) AS HasFreeChamber
+    FROM 
+        MACHINE
+    LEFT JOIN 
+        FAVOURITE_MACHINES ON MACHINE.Id = FAVOURITE_MACHINES.MachineId AND FAVOURITE_MACHINES.UserId = ?
+)
+
+SELECT DISTINCT
+    M1.MachineId,
+    M1.Address,
+    M1.PostalCode,
+    M1.Location,
+    M1.Latitude,
+    M1.Longitude,
+    M1.IsFav
+FROM 
+    AvailableMachines M1
+WHERE 
+    M1.IdMachineType = 1 
+    AND (
+        M1.HasFreeChamber = 1
+        OR EXISTS (
+            SELECT 1
+            FROM AvailableMachines M2
+            WHERE 
+                M2.Address = M1.Address
+                AND M2.PostalCode = M1.PostalCode
+                AND M2.Location = M1.Location
+                AND M2.IdMachineType <> 1
+                AND M2.HasFreeChamber = 1
+        )
+    )
+    """, (size, three_days_ago, current_date, user_id))
 
     machines = cursor.fetchall()
 
