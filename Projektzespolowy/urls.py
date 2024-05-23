@@ -28,7 +28,8 @@ urlpatterns = [
     path('create-order/', orders.create_order, name='create_order'),
     path('get-user-orders/<int:user_id>/', orders.get_user_orders, name='get_user_orders'),
     path('change-order-status/<int:order_id>/<int:status_id>/', orders.change_order_status, name='change_order_status'),
-    path('update-order-status-by-chamber/<int:chamber_id>/', orders.update_order_status_by_chamber, name='update_order_status_by_chamber'),    
+    path('update-order-status-by-chamber/<int:chamber_id>/', orders.update_order_status_by_chamber, name='update_order_status_by_chamber'),
+    path('postpone-order/', orders.postpone_order, name='postpone_order'),
     path('get-all-payment-methods/', payment.get_all_payment_methods, name='get_all_payment_methods'),
     path('get-size-prices/', payment.get_size_prices, name='get_size_prices'),
     path('get-all-machines/<int:user_id>/', machines.get_all_machines, name='get_all_machines'),
@@ -38,6 +39,7 @@ urlpatterns = [
     path('login/', authorize.login, name='login'),
     path('register/', authorize.register, name='register'),
     path('get-all-statuses/', admin.get_all_statuses, name='get_all_statuses'),
-    path('update-order/', admin.update_order, name='update_order')
+    path('update-order/', admin.update_order, name='update_order'),
+    path('update-machine/', admin.update_machine, name='update_machine'),
     # path('admin/', admin.site.urls),
 ]

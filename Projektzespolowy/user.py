@@ -4,6 +4,7 @@ import sqlite3
 import jwt
 from datetime import datetime, timedelta
 from middlewares import login_required
+from .coordinates import get_coordinates
 
 @login_required
 def get_all_users(request):
@@ -192,8 +193,14 @@ def edit_user(request, user_id):
                 'DefaultPostalcode': data.get('DefaultPostalcode'),
                 'DefaultLocation': data.get('DefaultLocation'),
                 'Phone': data.get('Phone'),
-                'Country': data.get('Country')
+                'Country': data.get('Country', 'Poland')  # Domyślnie Poland, jeśli brak wartości
             }
+
+            # Sprawdź, czy adres został zmieniony
+            address_changed = (
+                data.get('DefaultAddress') or 
+                data.get('DefaultLocation')
+            )
 
             # Połącz się z bazą danych
             conn = sqlite3.connect('msbox_database.db')
@@ -218,6 +225,18 @@ def edit_user(request, user_id):
                     user_id
                 ))
 
+                # Jeśli adres się zmienił, zaktualizuj koordynaty
+                if address_changed:
+                    default_address = data.get('DefaultAddress')
+                    default_location = data.get('DefaultLocation')
+                    latitude, longitude = get_coordinates(default_address, default_location)
+
+                    if latitude is None or longitude is None:
+                        return JsonResponse({'error': 'Failed to obtain coordinates for the given address'}, status=400)
+
+                    personal_updated_data['Latitude'] = latitude
+                    personal_updated_data['Longitude'] = longitude
+
                 # Aktualizuj dane osobowe użytkownika w tabeli PERSONAL_DATA
                 personal_update_query = """
                     UPDATE PERSONAL_DATA SET 
@@ -229,7 +248,9 @@ def edit_user(request, user_id):
                         DefaultPostalcode = ?, 
                         DefaultLocation = ?, 
                         Phone = ?, 
-                        Country = ?
+                        Country = ?,
+                        Latitude = ?, 
+                        Longitude = ?
                     WHERE UserId = ?
                 """
                 cursor.execute(personal_update_query, (
@@ -242,6 +263,8 @@ def edit_user(request, user_id):
                     personal_updated_data['DefaultLocation'],
                     personal_updated_data['Phone'],
                     personal_updated_data['Country'],
+                    personal_updated_data.get('Latitude'),  # Wartość może być None
+                    personal_updated_data.get('Longitude'),  # Wartość może być None
                     user_id
                 ))
 

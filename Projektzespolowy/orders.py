@@ -444,5 +444,57 @@ def update_order_status_by_chamber(request, chamber_id):
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+
+
+@login_required
+def postpone_order(request):
+    if request.method == 'PUT':
+        try:
+            # Parsuj dane JSON z ciała żądania
+            data = json.loads(request.body)
+            order_id = data.get('OrderId')
+            postponed_days = data.get('PostponedDays')
+
+            if order_id is None or postponed_days is None:
+                return JsonResponse({'error': 'OrderId and PostponedDays are required'}, status=400)
+
+            # Połącz się z bazą danych
+            conn = sqlite3.connect('msbox_database.db')
+            cursor = conn.cursor()
+
+            # Sprawdź, czy zamówienie istnieje, jest aktywne i ma StatusId <= 5
+            cursor.execute("""
+                SELECT Id FROM ORDER_ 
+                WHERE Id = ? AND Active = 1 AND StatusId <= 5
+            """, (order_id,))
+            order_exists = cursor.fetchone()
+
+            if order_exists is None:
+                conn.close()
+                return JsonResponse({'error': 'Order not found or not eligible for postponement'}, status=404)
+
+            # Aktualizuj kolumny Postponed i PostponedDays
+            cursor.execute("""
+                UPDATE ORDER_ 
+                SET Postponed = 1, PostponedDays = ? 
+                WHERE Id = ?
+            """, (postponed_days, order_id))
+
+            # Zatwierdź zmiany w bazie danych
+            conn.commit()
+            conn.close()
+
+            return JsonResponse({'message': 'Order postponed successfully'})
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON format'}, status=400)
+        except Exception as e:
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
