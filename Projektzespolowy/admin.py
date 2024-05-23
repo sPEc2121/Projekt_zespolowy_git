@@ -3,6 +3,8 @@ import json
 import sqlite3
 import jwt
 from datetime import datetime, timedelta
+import plotly.graph_objects as go
+import pandas as pd
 from middlewares import login_required
 from .coordinates import get_coordinates
 
@@ -368,3 +370,58 @@ def assign_machine(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+@login_required
+def generate_plot():
+    # Połączenie z bazą danych
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # Wykonanie zapytania SQL
+    query = """
+        SELECT
+            m1.Id,
+            m1.Address,
+            m1.PostalCode,
+            m1.Location,
+            COALESCE(SUM(CASE WHEN c.Status = 0 THEN 1 ELSE 0 END), 0) AS EmptyChambers,
+            COALESCE(SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END), 0) AS OccupiedChambers
+        FROM
+            MACHINE m1
+        LEFT JOIN (
+            SELECT
+                c.*,
+                m.Address,
+                m.PostalCode,
+                m.Location
+            FROM
+                CHAMBER c
+            JOIN MACHINE m ON c.MachineId = m.Id
+        ) c ON m1.Address = c.Address AND m1.PostalCode = c.PostalCode AND m1.Location = c.Location
+        WHERE
+            m1.IdMachineType = 1
+        GROUP BY
+            m1.Id, m1.Address, m1.PostalCode, m1.Location
+        ORDER BY
+            COALESCE(SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END), 0) * 1.0 /
+            (COALESCE(SUM(CASE WHEN c.Status = 0 THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END), 0)) DESC;
+    """
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    # Zamknięcie połączenia z bazą danych
+    conn.close()
+
+    # Konwersja wyników zapytania do ramki danych pandas
+    df = pd.DataFrame(rows, columns=['Id', 'Address', 'PostalCode', 'Location', 'EmptyChambers', 'OccupiedChambers'])
+
+    # Tworzenie wykresu słupkowego
+    fig = go.Figure()
+    fig.add_trace(go.Bar(name='Occupied Chambers', x=df['Id'], y=df['OccupiedChambers'], text=df['OccupiedChambers'], textposition='auto'))
+    fig.add_trace(go.Bar(name='Total Chambers', x=df['Id'], y=df['EmptyChambers'] + df['OccupiedChambers'], text=df['EmptyChambers'] + df['OccupiedChambers'], textposition='auto'))
+
+    # Aktualizacja układu wykresu
+    fig.update_layout(barmode='stack', title='Occupied vs Total Chambers', xaxis=dict(tickmode='array', tickvals=df['Id'], ticktext=df['Id']))
+
+    # Zwrócenie wykresu w formie HTML
+    return fig.to_html()
