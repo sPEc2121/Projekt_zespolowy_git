@@ -470,7 +470,7 @@ def postpone_order(request):
             """, (order_id,))
             order_exists = cursor.fetchone()
 
-            if order_exists is None:
+            if order_exists is None or postponed_days >=7:
                 conn.close()
                 return JsonResponse({'error': 'Order not found or not eligible for postponement'}, status=404)
 

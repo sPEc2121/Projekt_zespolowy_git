@@ -375,6 +375,8 @@ VALUES
 ('-', '-', '-', 'Poland', 2, NULL, NULL),
 ('-', '-', '-', 'Poland', 2, NULL, NULL),
 ('-', '-', '-', 'Poland', 3, NULL, NULL),
+('-', '-', '-', 'Poland', 3, NULL, NULL),
+('-', '-', '-', 'Poland', 3, NULL, NULL),
 ('-', '-', '-', 'Poland', 3, NULL, NULL)
 
 '''

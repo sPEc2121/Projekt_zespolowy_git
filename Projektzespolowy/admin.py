@@ -200,3 +200,171 @@ def update_machine(request):
 
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+
+@login_required
+def get_machine_fill_status(request):
+    if request.method == 'GET':
+        try:
+            # Połącz się z bazą danych
+            conn = sqlite3.connect('msbox_database.db')
+            cursor = conn.cursor()
+
+            # Zapytanie SQL do pobrania danych maszyn i ich zapełnienia
+            query = """
+                SELECT
+                    m1.Id,
+                    m1.Address,
+                    m1.PostalCode,
+                    m1.Location,
+                    COALESCE(SUM(CASE WHEN c.Status = 0 THEN 1 ELSE 0 END), 0) AS EmptyChambers,
+                    COALESCE(SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END), 0) AS OccupiedChambers,
+                    CONCAT(
+                        CAST(
+                            CASE 
+                                WHEN COUNT(c.Id) = 0 THEN '0.00'
+                                ELSE CAST(ROUND((SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END) * 100.0) / COUNT(c.Id), 2) AS VARCHAR(6))
+                            END AS VARCHAR(6)
+                        ), '%') AS OccupiedPercentage,
+                    COALESCE(COUNT(DISTINCT m2.Id), 0) AS MobileMachines,
+                    COALESCE(COUNT(DISTINCT m3.Id), 0) AS VerticalMachines
+                FROM
+                    MACHINE m1
+                LEFT JOIN (
+                    SELECT
+                        c.*,
+                        m.Address,
+                        m.PostalCode,
+                        m.Location
+                    FROM
+                        CHAMBER c
+                    JOIN MACHINE m ON c.MachineId = m.Id
+                ) c ON m1.Address = c.Address AND m1.PostalCode = c.PostalCode AND m1.Location = c.Location
+                LEFT JOIN MACHINE m2 ON m1.Address = m2.Address AND m1.PostalCode = m2.PostalCode AND m1.Location = m2.Location AND m2.IdMachineType = 2
+                LEFT JOIN MACHINE m3 ON m1.Address = m3.Address AND m1.PostalCode = m3.PostalCode AND m1.Location = m3.Location AND m3.IdMachineType = 3
+                WHERE
+                    m1.IdMachineType = 1
+                GROUP BY
+                    m1.Id, m1.Address, m1.PostalCode, m1.Location
+                ORDER BY
+                    COALESCE(SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END), 0) * 1.0 /
+                    (COALESCE(SUM(CASE WHEN c.Status = 0 THEN 1 ELSE 0 END), 0) + COALESCE(SUM(CASE WHEN c.Status = 1 THEN 1 ELSE 0 END), 0)) DESC;
+            """
+
+            cursor.execute(query)
+            machines = cursor.fetchall()
+
+            # Formatowanie wyników jako lista słowników
+            machines_list = [
+                {
+                    'Id': machine[0],
+                    'Address': machine[1],
+                    'PostalCode': machine[2],
+                    'Location': machine[3],
+                    'EmptyChambers': machine[4],
+                    'OccupiedChambers': machine[5],
+                    'OccupiedPercentage': machine[6],
+                    'MobileMachines': machine[7],
+                    'VerticalMachines': machine[8]
+                }
+                for machine in machines
+            ]
+
+            # Zamknięcie połączenia z bazą danych
+            conn.close()
+
+            # Zwrócenie wyników jako JSON
+            return JsonResponse({'machines': machines_list}, status=200)
+
+        except Exception as e:
+            # W przypadku błędu, zamknięcie połączenia i zwrócenie błędu
+            conn.close()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+@login_required
+def assign_machine(request):
+    if request.method == 'POST':
+        try:
+            # Parsuj dane JSON z ciała żądania
+            data = json.loads(request.body)
+            machine_id = data.get('machine_id')
+            id_machine_type = data.get('id_machine_type')
+
+            # Sprawdzenie, czy wymagane pola zostały przekazane
+            if not machine_id or not id_machine_type:
+                return JsonResponse({'error': 'Invalid input data'}, status=400)
+
+            # Połączenie z bazą danych
+            conn = sqlite3.connect('msbox_database.db')
+            cursor = conn.cursor()
+
+            # Pobranie szczegółów maszyny o podanym Id
+            cursor.execute("SELECT Address, PostalCode, Location FROM MACHINE WHERE Id = ?", (machine_id,))
+            machine_details = cursor.fetchone()
+
+            if not machine_details:
+                conn.close()
+                return JsonResponse({'error': 'Machine not found'}, status=404)
+
+            address, postal_code, location = machine_details
+
+            # Sprawdzenie liczby przypisanych maszyn
+            if id_machine_type == 2:
+                cursor.execute("""
+                    SELECT COUNT(*) FROM MACHINE 
+                    WHERE Address = ? AND PostalCode = ? AND Location = ? AND IdMachineType = 2
+                """, (address, postal_code, location))
+                mobile_count = cursor.fetchone()[0]
+
+                if mobile_count >= 1:
+                    conn.close()
+                    return JsonResponse({'error': 'Only one mobile machine can be assigned'}, status=400)
+
+            elif id_machine_type == 3:
+                cursor.execute("""
+                    SELECT COUNT(*) FROM MACHINE 
+                    WHERE Address = ? AND PostalCode = ? AND Location = ? AND IdMachineType = 3
+                """, (address, postal_code, location))
+                vertical_count = cursor.fetchone()[0]
+
+                if vertical_count >= 3:
+                    conn.close()
+                    return JsonResponse({'error': 'Only up to three vertical machines can be assigned'}, status=400)
+
+            # Znalezienie pierwszej wolnej maszyny do przypisania
+            cursor.execute("""
+                SELECT Id FROM MACHINE 
+                WHERE Address = '-' AND PostalCode = '-' AND Location = '-' AND IdMachineType = ?
+                LIMIT 1
+            """, (id_machine_type,))
+            available_machine = cursor.fetchone()
+
+            if not available_machine:
+                conn.close()
+                return JsonResponse({'error': 'No available machines to assign'}, status=404)
+
+            available_machine_id = available_machine[0]
+
+            # Przypisanie maszyny
+            cursor.execute("""
+                UPDATE MACHINE SET Address = ?, PostalCode = ?, Location = ? 
+                WHERE Id = ?
+            """, (address, postal_code, location, available_machine_id))
+
+            # Zatwierdzenie zmian
+            conn.commit()
+            conn.close()
+
+            return JsonResponse({'message': 'Machine assigned successfully'}, status=200)
+
+        except Exception as e:
+            if conn:
+                conn.rollback()
+                conn.close()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
