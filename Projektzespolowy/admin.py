@@ -4,6 +4,7 @@ import sqlite3
 import jwt
 from datetime import datetime, timedelta
 from middlewares import login_required
+from .coordinates import get_coordinates
 
 @login_required
 def get_all_statuses(request):
@@ -146,3 +147,56 @@ def update_order(request):
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
+@login_required
+def update_machine(request):
+    if request.method == 'POST':
+        try:
+            # Pobranie danych z żądania
+            data = json.loads(request.body)
+            machine_id = data.get('Id')
+            address = data.get('Address')
+            postal_code = data.get('PostalCode')
+            location = data.get('Location')
+
+            # Generowanie koordynatów na podstawie adresu maszyny
+            latitude, longitude = get_coordinates(address, location)
+
+            if latitude is None or longitude is None:
+                return JsonResponse({'error': 'Failed to obtain coordinates for the given address'}, status=400)
+
+            # Połączenie z bazą danych
+            conn = sqlite3.connect('msbox_database.db')
+            cursor = conn.cursor()
+
+            # Sprawdzenie, czy maszyna o podanym Id istnieje
+            cursor.execute("""
+                SELECT Id FROM MACHINE WHERE Id = ?
+            """, (machine_id,))
+            machine_exists = cursor.fetchone()
+
+            if machine_exists is None:
+                # Maszyna o podanym Id nie istnieje - zwróć błąd
+                conn.close()
+                return JsonResponse({'error': 'Machine not found'}, status=404)
+
+            # Aktualizacja danych maszyny
+            cursor.execute("""
+                UPDATE MACHINE
+                SET Address = ?, PostalCode = ?, Location = ?, Latitude = ?, Longitude = ?
+                WHERE Id = ?
+            """, (address, postal_code, location, latitude, longitude, machine_id))
+
+            # Zatwierdzenie zmian w bazie danych
+            conn.commit()
+            conn.close()
+
+            return JsonResponse({'message': 'Machine updated successfully'}, status=200)
+
+        except Exception as e:
+            # Wystąpił błąd - wykonaj rollback
+            conn.rollback()
+            conn.close()
+            return JsonResponse({'error': str(e)}, status=500)
+
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)

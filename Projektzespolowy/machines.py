@@ -42,7 +42,7 @@ def get_all_machines(request, user_id):
             'PostalCode': machine[2],
             'Location': machine[3],
             'Country': machine[4],
-            'IdMachineType': bool(machine[5]),
+            'IdMachineType': machine[5],
             'Latitude': machine[6],
             'Longitude': machine[7],
             'IsFav': bool(machine[8])
@@ -209,4 +209,6 @@ def remove_favourite_machine(request, user_id, machine_id):
             return JsonResponse({'success': False, 'message': f'Error removing machine from favourites: {str(e)}'}, status=500)
 
     return JsonResponse({'error': 'Unsupported method'}, status=405)
+
+
 
