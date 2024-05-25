@@ -444,7 +444,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/change-order-status/26/5/",
+							"raw": "http://127.0.0.1:8000/change-order-status/22/11/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -455,8 +455,8 @@
 							"port": "8000",
 							"path": [
 								"change-order-status",
-								"26",
-								"5",
+								"22",
+								"11",
 								""
 							]
 						}
@@ -467,6 +467,43 @@
 					"name": "Postpone order",
 					"request": {
 						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"OrderId\": 26,\r\n    \"PostponedDays\": 4\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/postpone-order/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"postpone-order",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "test_box",
+					"request": {
+						"method": "POST",
 						"header": [
 							{
 								"key": "Authorization",
@@ -834,6 +871,43 @@
 				},
 				{
 					"name": "Assign machine type 2 and 3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"machine_id\": 51,\r\n        \"id_machine_type\": 3\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/assign-machine/",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"assign-machine",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Assign machine type 2 and 3 Copy",
 					"request": {
 						"method": "POST",
 						"header": [
