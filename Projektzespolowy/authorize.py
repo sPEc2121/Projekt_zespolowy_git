@@ -7,7 +7,7 @@ from .coordinates import get_coordinates
 
 def register(request):
     if request.method == 'POST':
-        # Pobranie danych z żądania
+
         data = json.loads(request.body)
         mail = data.get('Mail')
         password = data.get('Password')
@@ -19,56 +19,56 @@ def register(request):
         default_postalcode = data.get('DefaultPostalcode')
         default_location = data.get('DefaultLocation')
         phone = data.get('Phone')
-        country = 'Poland'  # Ustaw domyślną wartość Polska, jeśli nie zostanie przekazana
+        country = 'Poland'
 
-        # Generowanie koordynatów na podstawie adresu użytkownika
+
         latitude, longitude = get_coordinates(default_address, default_location)
 
-        # Połączenie z bazą danych
+
         conn = sqlite3.connect('msbox_database.db')
         cursor = conn.cursor()
 
         try:
-            # Wstawienie danych do tabeli USER
+
             cursor.execute("""
             INSERT INTO USER (Mail, Password, Active)
             VALUES (?, ?, 1);
             """, (mail, password))
 
-            # Pobranie ID użytkownika
+
             user_id = cursor.lastrowid
 
-            # Wstawienie danych do tabeli PERSONAL_DATA
+
             cursor.execute("""
             INSERT INTO PERSONAL_DATA (UserId, FirstName, LastName, BirthDate, Sex, DefaultAddress, DefaultPostalcode, DefaultLocation, Phone, Country, Latitude, Longitude)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """, (user_id, first_name, last_name, birth_date, sex, default_address, default_postalcode, default_location, phone, country, latitude, longitude))
 
-            # Wstawienie danych do tabeli USER_ROLE
+
             cursor.execute("""
             INSERT INTO USER_ROLE (UserId, RoleId)
             VALUES (?, ?);
-            """, (user_id, 1))  # Przypisanie roli o ID=1
+            """, (user_id, 1))
 
-            # Zatwierdzenie zmian w bazie danych
+
             conn.commit()
 
-            # Zamknięcie połączenia z bazą danych
+
             conn.close()
 
-            # Zwrócenie odpowiedzi JSON informującej o sukcesie
+
             return JsonResponse({'success': True, 'message': 'Rejestracja zakończona pomyślnie.'}, status=201)
         except Exception as e:
-            # Jeśli wystąpił błąd, wycofaj zmiany w bazie danych
+
             conn.rollback()
 
-            # Zamknięcie połączenia z bazą danych
+
             conn.close()
 
-            # Zwrócenie odpowiedzi JSON z informacją o błędzie
+
             return JsonResponse({'success': False, 'message': f'Błąd podczas rejestracji: {str(e)}'}, status=500)
 
-    # Zwrócenie odpowiedzi JSON w przypadku żądania innego niż POST
+
     return JsonResponse({'error': 'Metoda nieobsługiwana.'}, status=405)
 
 
@@ -97,7 +97,7 @@ def login(request):
         
         if user is not None:
             
-            payload = {'Id': user[0],'Mail': mail, 'RoleName': user[4]}  # Assuming RoleId is at index 6
+            payload = {'Id': user[0],'Mail': mail, 'RoleName': user[4]}
             secret_key = 'WSPA i tak tego nikt nie przeczyta'
 
             expiration_time = datetime.utcnow() + timedelta(hours=2)

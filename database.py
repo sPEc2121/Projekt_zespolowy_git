@@ -1,11 +1,11 @@
 import sqlite3
 
 
-# Opening (or creating if not exists) database file
+
 conn = sqlite3.connect('msbox_database.db')
 cursor = conn.cursor()
 
-# Tabele do zachowania
+
 tables_to_keep = [
     'django_migrations',
     'django_admin_log',
@@ -16,19 +16,19 @@ tables_to_keep = [
     'sqlite_sequence'
 ]
 
-# Pobranie nazw wszystkich tabel w bazie danych
+
 cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
 all_tables = cursor.fetchall()
 
-# Wyczyszczenie zawartości każdej tabeli, której nazwa nie znajduje się na liście tabel do zachowania
+
 for table in all_tables:
     table_name = table[0]
     if table_name not in tables_to_keep:
         cursor.execute("DROP TABLE {}".format(table_name))
 
-# Creating tables from schema
 
-# Defining tables
+
+
 create_table_user = '''
 CREATE TABLE IF NOT EXISTS USER (
   Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS ORDER_CHAMBER (
 );
 '''
 
-# Executing table create commands
+
 cursor.execute(create_table_user)
 cursor.execute(create_table_personal_data)
 cursor.execute(create_table_machine_type)
@@ -195,61 +195,61 @@ cursor.execute(create_table_user_role)
 cursor.execute(create_table_order)
 cursor.execute(create_table_order_chamber)
 
-# Filling created tables with data
+
 
 insert_user = '''
 INSERT INTO USER (Mail, Password, Active)
 VALUES
-('krzysztof.duda@example.com', 'Qwerty12#$', 1),
-('ireneusz.sikorski@example.com', 'Qwerty12#$', 1),
-('fabian.gajewski@example.com', 'Qwerty12#$', 1),
-('kamil.glowacki@example.com', 'Qwerty12#$', 1),
-('natan.glowacki@example.com', 'Qwerty12#$', 1),
-('konstanty.stepien@example.com', 'Qwerty12#$', 1),
-('aleksander.bak@example.com', 'Qwerty12#$', 1),
-('bartlomiej.walczak@example.com', 'Qwerty12#$', 1),
-('henryk.szymczak@example.com', 'Qwerty12#$', 1),
-('adrian.tomaszewski@example.com', 'Qwerty12#$', 1),
-('gracjan.gajewski@example.com', 'Qwerty12#$', 1),
-('blazej.kalinowski@example.com', 'Qwerty12#$', 1),
-('kewin.marciniak@example.com', 'Qwerty12#$', 1),
-('kryspin.krupa@example.com', 'Qwerty12#$', 1),
-('kacper.sobczak@example.com', 'Qwerty12#$', 1),
-('eryk.kazmierczak@example.com', 'Qwerty12#$', 1),
-('konstanty.zielinski@example.com', 'Qwerty12#$', 1),
-('norbert.dabrowski@example.com', 'Qwerty12#$', 1),
-('klaudiusz.adamski@example.com', 'Qwerty12#$', 1),
-('gracjan.sobczak@example.com', 'Qwerty12#$', 1),
-('jacek.przybylski@example.com', 'Qwerty12#$', 1),
-('bogumil.duda@example.com', 'Qwerty12#$', 1),
-('kornel.tomaszewski@example.com', 'Qwerty12#$', 1),
-('daniel.kowalski@example.com', 'Qwerty12#$', 1),
-('kordian.zielinski@example.com', 'Qwerty12#$', 1),
-('jozefa.ostrowska@example.com', 'Qwerty12#$', 1),
-('anna.sobczak@example.com', 'Qwerty12#$', 1),
-('natasza.jakubowska@example.com', 'Qwerty12#$', 1),
-('alina.pawlak@example.com', 'Qwerty12#$', 1),
-('kaja.mazur@example.com', 'Qwerty12#$', 1),
-('boguslawa.wisniewska@example.com', 'Qwerty12#$', 1),
-('zofia.sikorska@example.com', 'Qwerty12#$', 1),
-('amanda.adamska@example.com', 'Qwerty12#$', 1),
-('irena.cieslak@example.com', 'Qwerty12#$', 1),
-('roza.duda@example.com', 'Qwerty12#$', 1),
-('urszula.baranowska@example.com', 'Qwerty12#$', 1),
-('joanna.urbanska@example.com', 'Qwerty12#$', 1),
-('arleta.nowak@example.com', 'Qwerty12#$', 1),
-('cecylia.zakrzewska@example.com', 'Qwerty12#$', 1),
-('monika.ziolkowska@example.com', 'Qwerty12#$', 1),
-('martyna.zawadzka@example.com', 'Qwerty12#$', 1),
-('eleonora.zielinska@example.com', 'Qwerty12#$', 1),
-('amelia.sikora@example.com', 'Qwerty12#$', 1),
-('adriana.baran@example.com', 'Qwerty12#$', 1),
-('elena.witkowska@example.com', 'Qwerty12#$', 1),
-('wanda.pawlak@example.com', 'Qwerty12#$', 1),
-('julianna.zalewska@example.com', 'Qwerty12#$', 1),
-('elena.jaworska@example.com', 'Qwerty12#$', 1),
-('judyta.zalewska@example.com', 'Qwerty12#$', 1),
-('teresa.makowska@example.com', 'Qwerty12#$', 1)
+('krzysztof.duda@example.com', 'Qwerty12
+('ireneusz.sikorski@example.com', 'Qwerty12
+('fabian.gajewski@example.com', 'Qwerty12
+('kamil.glowacki@example.com', 'Qwerty12
+('natan.glowacki@example.com', 'Qwerty12
+('konstanty.stepien@example.com', 'Qwerty12
+('aleksander.bak@example.com', 'Qwerty12
+('bartlomiej.walczak@example.com', 'Qwerty12
+('henryk.szymczak@example.com', 'Qwerty12
+('adrian.tomaszewski@example.com', 'Qwerty12
+('gracjan.gajewski@example.com', 'Qwerty12
+('blazej.kalinowski@example.com', 'Qwerty12
+('kewin.marciniak@example.com', 'Qwerty12
+('kryspin.krupa@example.com', 'Qwerty12
+('kacper.sobczak@example.com', 'Qwerty12
+('eryk.kazmierczak@example.com', 'Qwerty12
+('konstanty.zielinski@example.com', 'Qwerty12
+('norbert.dabrowski@example.com', 'Qwerty12
+('klaudiusz.adamski@example.com', 'Qwerty12
+('gracjan.sobczak@example.com', 'Qwerty12
+('jacek.przybylski@example.com', 'Qwerty12
+('bogumil.duda@example.com', 'Qwerty12
+('kornel.tomaszewski@example.com', 'Qwerty12
+('daniel.kowalski@example.com', 'Qwerty12
+('kordian.zielinski@example.com', 'Qwerty12
+('jozefa.ostrowska@example.com', 'Qwerty12
+('anna.sobczak@example.com', 'Qwerty12
+('natasza.jakubowska@example.com', 'Qwerty12
+('alina.pawlak@example.com', 'Qwerty12
+('kaja.mazur@example.com', 'Qwerty12
+('boguslawa.wisniewska@example.com', 'Qwerty12
+('zofia.sikorska@example.com', 'Qwerty12
+('amanda.adamska@example.com', 'Qwerty12
+('irena.cieslak@example.com', 'Qwerty12
+('roza.duda@example.com', 'Qwerty12
+('urszula.baranowska@example.com', 'Qwerty12
+('joanna.urbanska@example.com', 'Qwerty12
+('arleta.nowak@example.com', 'Qwerty12
+('cecylia.zakrzewska@example.com', 'Qwerty12
+('monika.ziolkowska@example.com', 'Qwerty12
+('martyna.zawadzka@example.com', 'Qwerty12
+('eleonora.zielinska@example.com', 'Qwerty12
+('amelia.sikora@example.com', 'Qwerty12
+('adriana.baran@example.com', 'Qwerty12
+('elena.witkowska@example.com', 'Qwerty12
+('wanda.pawlak@example.com', 'Qwerty12
+('julianna.zalewska@example.com', 'Qwerty12
+('elena.jaworska@example.com', 'Qwerty12
+('judyta.zalewska@example.com', 'Qwerty12
+('teresa.makowska@example.com', 'Qwerty12
 '''
 
 insert_personal_data = '''
@@ -370,8 +370,8 @@ VALUES
 ('Chmielna 23', '90-222', 'Poznań', 'Poland', 1, 52.4685244, 16.8969528),
 ('Paderewskiego 29', '80-001', 'Kraków', 'Poland', 1, 50.0664772, 19.9418835),
 ('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 1, 54.3667621, 18.61358590607766),
-('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 2, 54.3667621, 18.61358590607766),
-('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 3, 54.3667621, 18.61358590607766),
+('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 2, NULL, NULL),
+('Sobieskiego 18', '70-765', 'Gdańsk', 'Poland', 3, NULL, NULL),
 ('-', '-', '-', 'Poland', 2, NULL, NULL),
 ('-', '-', '-', 'Poland', 2, NULL, NULL),
 ('-', '-', '-', 'Poland', 3, NULL, NULL),
@@ -3790,7 +3790,7 @@ VALUES
 (6, 19, 44, 141, 1, 'Samochód', 0, '2023-07-15 18:03:41', '2023-07-22 23:13:41', 19, 44, '2023-07-20 23:13:41', '2023-07-21 23:13:41', NULL, NULL, 1, 1200),
 (6, 20, 45, 13, 2, 'Jedzenie', 0, '2023-08-15 03:42:19', '2023-08-22 08:52:19', 20, 45, '2023-08-20 08:52:19', '2023-08-21 08:52:19', NULL, NULL, 1, 1200),
 (6, 21, 46, 44, 3, 'Elektronika', 0, '2023-09-15 12:59:53', '2023-09-22 17:09:53', 21, 46, '2023-09-20 17:09:53', '2023-09-21 17:09:53', NULL, NULL, 1, 1200),
-(1, 22, 47, 67, 1, 'Medycyna', 1, '2023-10-15 20:10:26', NULL, 22, 47, NULL, NULL, NULL, NULL, 0, 1200),
+(1, 22, 47, 434, 1, 'Medycyna', 1, '2024-05-24 20:10:26', NULL, 22, 47, NULL, NULL, NULL, NULL, 0, 1200),
 (2, 23, 48, 81, 2, 'Kosmetyki', 1, '2023-11-15 07:27:13', NULL, 23, 48, NULL, NULL, NULL, NULL, 0, 1200),
 (3, 24, 49, 25, 3, 'Zwierzęta', 1, '2023-12-15 16:34:57', NULL, 24, 49, NULL, NULL, NULL, NULL, 0, 1200),
 (5, 25, 50, 198, 1, 'Ubrania', 1, '2023-12-31 23:59:59', NULL, 25, 50, NULL, NULL, NULL, NULL, 1, 1200);
@@ -3915,6 +3915,12 @@ VALUES
 (50, 1)
 '''
 
+insert_order_chamber = '''
+INSERT INTO ORDER_CHAMBER (OrderId, ChamberId)
+VALUES
+(22, 934)
+'''
+
 
 truncate_user = 'DELETE FROM USER'
 truncate_personal_data = 'DELETE FROM PERSONAL_DATA'
@@ -3957,7 +3963,7 @@ cursor.execute(insert_order)
 cursor.execute(insert_favourite_machines)
 cursor.execute(insert_role)
 cursor.execute(insert_user_role)
-
+cursor.execute(insert_order_chamber)
 
 
 conn.commit()

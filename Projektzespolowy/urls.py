@@ -43,6 +43,6 @@ urlpatterns = [
     path('update-machine/', admin.update_machine, name='update_machine'),
     path('get-machine-fill-status/', admin.get_machine_fill_status, name='get_machine_fill_status'),
     path('assign-machine/', admin.assign_machine, name='assign_machine'),
-    path('generate-plot/', admin.generate_plot, name='generate_plot'),
+    path('unassign-machine/', admin.unassign_machine, name='unassign_machine'),
     # path('admin/', admin.site.urls),
 ]
