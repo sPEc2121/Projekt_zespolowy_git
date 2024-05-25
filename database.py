@@ -200,56 +200,58 @@ cursor.execute(create_table_order_chamber)
 insert_user = '''
 INSERT INTO USER (Mail, Password, Active)
 VALUES
-('krzysztof.duda@example.com', 'Qwerty12
-('ireneusz.sikorski@example.com', 'Qwerty12
-('fabian.gajewski@example.com', 'Qwerty12
-('kamil.glowacki@example.com', 'Qwerty12
-('natan.glowacki@example.com', 'Qwerty12
-('konstanty.stepien@example.com', 'Qwerty12
-('aleksander.bak@example.com', 'Qwerty12
-('bartlomiej.walczak@example.com', 'Qwerty12
-('henryk.szymczak@example.com', 'Qwerty12
-('adrian.tomaszewski@example.com', 'Qwerty12
-('gracjan.gajewski@example.com', 'Qwerty12
-('blazej.kalinowski@example.com', 'Qwerty12
-('kewin.marciniak@example.com', 'Qwerty12
-('kryspin.krupa@example.com', 'Qwerty12
-('kacper.sobczak@example.com', 'Qwerty12
-('eryk.kazmierczak@example.com', 'Qwerty12
-('konstanty.zielinski@example.com', 'Qwerty12
-('norbert.dabrowski@example.com', 'Qwerty12
-('klaudiusz.adamski@example.com', 'Qwerty12
-('gracjan.sobczak@example.com', 'Qwerty12
-('jacek.przybylski@example.com', 'Qwerty12
-('bogumil.duda@example.com', 'Qwerty12
-('kornel.tomaszewski@example.com', 'Qwerty12
-('daniel.kowalski@example.com', 'Qwerty12
-('kordian.zielinski@example.com', 'Qwerty12
-('jozefa.ostrowska@example.com', 'Qwerty12
-('anna.sobczak@example.com', 'Qwerty12
-('natasza.jakubowska@example.com', 'Qwerty12
-('alina.pawlak@example.com', 'Qwerty12
-('kaja.mazur@example.com', 'Qwerty12
-('boguslawa.wisniewska@example.com', 'Qwerty12
-('zofia.sikorska@example.com', 'Qwerty12
-('amanda.adamska@example.com', 'Qwerty12
-('irena.cieslak@example.com', 'Qwerty12
-('roza.duda@example.com', 'Qwerty12
-('urszula.baranowska@example.com', 'Qwerty12
-('joanna.urbanska@example.com', 'Qwerty12
-('arleta.nowak@example.com', 'Qwerty12
-('cecylia.zakrzewska@example.com', 'Qwerty12
-('monika.ziolkowska@example.com', 'Qwerty12
-('martyna.zawadzka@example.com', 'Qwerty12
-('eleonora.zielinska@example.com', 'Qwerty12
-('amelia.sikora@example.com', 'Qwerty12
-('adriana.baran@example.com', 'Qwerty12
-('elena.witkowska@example.com', 'Qwerty12
-('wanda.pawlak@example.com', 'Qwerty12
-('julianna.zalewska@example.com', 'Qwerty12
-('elena.jaworska@example.com', 'Qwerty12
-('judyta.zalewska@example.com', 'Qwerty12
-('teresa.makowska@example.com', 'Qwerty12
+('krzysztof.duda@example.com', 'Qwerty12#$', 1),
+('ireneusz.sikorski@example.com', 'Qwerty12#$', 1),
+('fabian.gajewski@example.com', 'Qwerty12#$', 1),
+('kamil.glowacki@example.com', 'Qwerty12#$', 1),
+('natan.glowacki@example.com', 'Qwerty12#$', 1),
+('konstanty.stepien@example.com', 'Qwerty12#$', 1),
+('aleksander.bak@example.com', 'Qwerty12#$', 1),
+('bartlomiej.walczak@example.com', 'Qwerty12#$', 1),
+('henryk.szymczak@example.com', 'Qwerty12#$', 1),
+('adrian.tomaszewski@example.com', 'Qwerty12#$', 1),
+('gracjan.gajewski@example.com', 'Qwerty12#$', 1),
+('blazej.kalinowski@example.com', 'Qwerty12#$', 1),
+('kewin.marciniak@example.com', 'Qwerty12#$', 1),
+('kryspin.krupa@example.com', 'Qwerty12#$', 1),
+('kacper.sobczak@example.com', 'Qwerty12#$', 1),
+('eryk.kazmierczak@example.com', 'Qwerty12#$', 1),
+('konstanty.zielinski@example.com', 'Qwerty12#$', 1),
+('norbert.dabrowski@example.com', 'Qwerty12#$', 1),
+('klaudiusz.adamski@example.com', 'Qwerty12#$', 1),
+('gracjan.sobczak@example.com', 'Qwerty12#$', 1),
+('jacek.przybylski@example.com', 'Qwerty12#$', 1),
+('bogumil.duda@example.com', 'Qwerty12#$', 1),
+('kornel.tomaszewski@example.com', 'Qwerty12#$', 1),
+('daniel.kowalski@example.com', 'Qwerty12#$', 1),
+('kordian.zielinski@example.com', 'Qwerty12#$', 1),
+('jozefa.ostrowska@example.com', 'Qwerty12#$', 1),
+('anna.sobczak@example.com', 'Qwerty12#$', 1),
+('natasza.jakubowska@example.com', 'Qwerty12#$', 1),
+('alina.pawlak@example.com', 'Qwerty12#$', 1),
+('kaja.mazur@example.com', 'Qwerty12#$', 1),
+('boguslawa.wisniewska@example.com', 'Qwerty12#$', 1),
+('zofia.sikorska@example.com', 'Qwerty12#$', 1),
+('amanda.adamska@example.com', 'Qwerty12#$', 1),
+('irena.cieslak@example.com', 'Qwerty12#$', 1),
+('roza.duda@example.com', 'Qwerty12#$', 1),
+('urszula.baranowska@example.com', 'Qwerty12#$', 1),
+('joanna.urbanska@example.com', 'Qwerty12#$', 1),
+('arleta.nowak@example.com', 'Qwerty12#$', 1),
+('cecylia.zakrzewska@example.com', 'Qwerty12#$', 1),
+('monika.ziolkowska@example.com', 'Qwerty12#$', 1),
+('martyna.zawadzka@example.com', 'Qwerty12#$', 1),
+('eleonora.zielinska@example.com', 'Qwerty12#$', 1),
+('amelia.sikora@example.com', 'Qwerty12#$', 1),
+('adriana.baran@example.com', 'Qwerty12#$', 1),
+('elena.witkowska@example.com', 'Qwerty12#$', 1),
+('wanda.pawlak@example.com', 'Qwerty12#$', 1),
+('julianna.zalewska@example.com', 'Qwerty12#$', 1),
+('elena.jaworska@example.com', 'Qwerty12#$', 1),
+('judyta.zalewska@example.com', 'Qwerty12#$', 1),
+('teresa.makowska@example.com', 'Qwerty12#$', 1),
+('adam.duda@example.com', 'Qwerty12#$', 1)
+
 '''
 
 insert_personal_data = '''
@@ -305,7 +307,8 @@ VALUES
 (47, 'Julianna', 'Zalewska', '1983-05-17', 1, 'Dworcowa 25', '85-006', 'Bydgoszcz', '48547890123', 'Poland', 53.0378108, 17.9651158),
 (48, 'Elena', 'Jaworska', '1981-12-02', 1, 'Jagiellońska 30', '85-035', 'Bydgoszcz', '48548901234', 'Poland', 53.1272024, 17.9997705),
 (49, 'Judyta', 'Zalewska', '1984-04-25', 1, 'Lipowa 15', '15-424', 'Białystok', '48549012345', 'Poland', 53.122927700000005, 18.010881403925488),
-(50, 'Teresa', 'Makowska', '1988-02-13', 1, 'Sienkiewicza 10', '15-001', 'Białystok', '48550123456', 'Poland', 53.1327256, 23.15447829116575)
+(50, 'Teresa', 'Makowska', '1988-02-13', 1, 'Sienkiewicza 10', '15-001', 'Białystok', '48550123456', 'Poland', 53.1327256, 23.15447829116575),
+(51, 'Adam', 'Duda', '1985-03-12', 0, 'Sienkiewicza 10', '65-001', 'Zielona Góra', '48501234567', 'Poland', 51.93276135, 15.510587489789993)
 '''
 
 insert_machine_type = '''
@@ -3912,7 +3915,8 @@ VALUES
 (47, 1),
 (48, 1),
 (49, 1),
-(50, 1)
+(50, 1),
+(51, 2)
 '''
 
 insert_order_chamber = '''
