@@ -907,7 +907,7 @@
 					"response": []
 				},
 				{
-					"name": "Assign machine type 2 and 3 Copy",
+					"name": "Unassign machine type 2 and 3",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -926,7 +926,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://127.0.0.1:8000/assign-machine/",
+							"raw": "http://127.0.0.1:8000/unassign-machine/",
 							"protocol": "http",
 							"host": [
 								"127",
@@ -936,7 +936,7 @@
 							],
 							"port": "8000",
 							"path": [
-								"assign-machine",
+								"unassign-machine",
 								""
 							]
 						}
