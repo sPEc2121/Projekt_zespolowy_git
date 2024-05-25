@@ -39,81 +39,81 @@ def get_all_users(request):
 @login_required
 def disable_user(request):
     if request.method == 'PUT':
-        # Pobranie danych z żądania
+
         data = json.loads(request.body)
         user_id = data.get('Id')
 
-        # Połączenie z bazą danych
+
         conn = sqlite3.connect('msbox_database.db')
         cursor = conn.cursor()
 
         try:
-            # Aktualizacja rekordu w tabeli USER
+
             cursor.execute("""
             UPDATE USER
             SET Active = 0
             WHERE Id = ?;
             """, (user_id,))
 
-            # Zatwierdzenie zmian w bazie danych
+
             conn.commit()
 
-            # Zamknięcie połączenia z bazą danych
+
             conn.close()
 
-            # Zwrócenie odpowiedzi JSON informującej o sukcesie
+
             return JsonResponse({'success': True, 'message': 'Pomyślnie zdezaktywowano użytkownika.'}, status=200)
         except Exception as e:
-            # Jeśli wystąpił błąd, wycofaj zmiany w bazie danych
+
             conn.rollback()
 
-            # Zamknięcie połączenia z bazą danych
+
             conn.close()
 
-            # Zwrócenie odpowiedzi JSON z informacją o błędzie
+
             return JsonResponse({'success': False, 'message': f'Błąd podczas dezaktywacji użytkownika: {str(e)}'}, status=500)
 
-    # Zwrócenie odpowiedzi JSON w przypadku żądania innego niż PUT
+
     return JsonResponse({'error': 'Metoda nieobsługiwana lub brak uprawnień.'}, status=405)
 
 @login_required
 def enable_user(request):
     if request.method == 'PUT':
-        # Pobranie danych z żądania
+
         data = json.loads(request.body)
         user_id = data.get('Id')
 
-        # Połączenie z bazą danych
+
         conn = sqlite3.connect('msbox_database.db')
         cursor = conn.cursor()
 
         try:
-            # Aktualizacja rekordu w tabeli USER
+
             cursor.execute("""
             UPDATE USER
             SET Active = 1
             WHERE Id = ?;
             """, (user_id,))
 
-            # Zatwierdzenie zmian w bazie danych
+
             conn.commit()
 
-            # Zamknięcie połączenia z bazą danych
+
             conn.close()
 
-            # Zwrócenie odpowiedzi JSON informującej o sukcesie
+
             return JsonResponse({'success': True, 'message': 'Pomyślnie aktywowano użytkownika.'}, status=200)
         except Exception as e:
-            # Jeśli wystąpił błąd, wycofaj zmiany w bazie danych
+
             conn.rollback()
 
-            # Zamknięcie połączenia z bazą danych
+
             conn.close()
 
-            # Zwrócenie odpowiedzi JSON z informacją o błędzie
+
             return JsonResponse({'success': False, 'message': f'Błąd podczas aktywacji użytkownika: {str(e)}'}, status=500)
 
-    # Zwrócenie odpowiedzi JSON w przypadku żądania innego niż PUT
+
     return JsonResponse({'error': 'Metoda nieobsługiwana lub brak uprawnień.'}, status=405)
 
 
@@ -173,17 +173,17 @@ def get_user_by_id(request, user_id):
 def edit_user(request, user_id):
     if request.method == 'PUT':
         try:
-            # Parsuj dane JSON z ciała żądania
+
             data = json.loads(request.body)
 
-            # Ustaw dane użytkownika do aktualizacji
+
             user_updated_data = {
                 'Mail': data.get('Mail'),
                 'Password': data.get('Password'),
                 'Active': data.get('Active')
             }
 
-            # Ustaw dane osobowe użytkownika do aktualizacji
+
             personal_updated_data = {
                 'FirstName': data.get('FirstName'),
                 'LastName': data.get('LastName'),
@@ -193,24 +193,24 @@ def edit_user(request, user_id):
                 'DefaultPostalcode': data.get('DefaultPostalcode'),
                 'DefaultLocation': data.get('DefaultLocation'),
                 'Phone': data.get('Phone'),
-                'Country': data.get('Country', 'Poland')  # Domyślnie Poland, jeśli brak wartości
+                'Country': data.get('Country', 'Poland')
             }
 
-            # Sprawdź, czy adres został zmieniony
+
             address_changed = (
                 data.get('DefaultAddress') or 
                 data.get('DefaultLocation')
             )
 
-            # Połącz się z bazą danych
+
             conn = sqlite3.connect('msbox_database.db')
             cursor = conn.cursor()
 
-            # Rozpocznij transakcję
+
             conn.execute("BEGIN")
 
             try:
-                # Aktualizuj dane użytkownika w tabeli USER
+
                 user_update_query = """
                     UPDATE USER SET 
                         Mail = ?, 
@@ -225,7 +225,7 @@ def edit_user(request, user_id):
                     user_id
                 ))
 
-                # Jeśli adres się zmienił, zaktualizuj koordynaty
+
                 if address_changed:
                     default_address = data.get('DefaultAddress')
                     default_location = data.get('DefaultLocation')
@@ -237,7 +237,7 @@ def edit_user(request, user_id):
                     personal_updated_data['Latitude'] = latitude
                     personal_updated_data['Longitude'] = longitude
 
-                # Aktualizuj dane osobowe użytkownika w tabeli PERSONAL_DATA
+
                 personal_update_query = """
                     UPDATE PERSONAL_DATA SET 
                         FirstName = ?, 
@@ -263,21 +263,21 @@ def edit_user(request, user_id):
                     personal_updated_data['DefaultLocation'],
                     personal_updated_data['Phone'],
                     personal_updated_data['Country'],
-                    personal_updated_data.get('Latitude'),  # Wartość może być None
-                    personal_updated_data.get('Longitude'),  # Wartość może być None
+                    personal_updated_data.get('Latitude'),
+                    personal_updated_data.get('Longitude'),
                     user_id
                 ))
 
-                # Zatwierdź transakcję
+
                 conn.commit()
 
             except Exception as e:
-                # W przypadku błędu, cofnij transakcję
+
                 conn.rollback()
                 raise e
 
             finally:
-                # Zamknij połączenie z bazą danych
+
                 conn.close()
 
             return JsonResponse({'message': 'User data updated successfully'})
